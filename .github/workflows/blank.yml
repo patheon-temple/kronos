@@ -1,0 +1,84 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    env:
+       SSH_USER: ${{ secrets.SSH_USER }}
+       SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+       SSH_HOST: ${{ secrets.FORPSI_PANTHEON_ADDRESS }}
+       JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
+       SERVICE_NAME: test-service.service
+       EXEC_START: /usr/bin/my-command
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+      
+      - name: Create SSH configuration
+        run: |
+           mkdir -p ~/.ssh/
+           echo "$SSH_KEY" > ~/.ssh/staging.key
+           chmod 600 ~/.ssh/staging.key
+           cat >>~/.ssh/config <<END
+           Host staging
+             HostName $SSH_HOST
+             User $SSH_USER
+             IdentityFile ~/.ssh/staging.key
+             StrictHostKeyChecking no
+           END
+           
+      - name: Test SSH connection
+        run: |
+           ssh staging "echo 'SSH Connection successful'"
+      - name: Generate the .service file
+        run: |
+            # Define the content of the service file
+            cat <<EOF > $SERVICE_NAME
+            [Unit]
+            Description=Service template for .NET services
+            After=network.target
+  
+            [Service]
+            ExecStart=$EXEC_START
+            Restart=always
+            User=ubuntu
+            Group=ubuntu
+            Environment=JWT_PRIVATE_KEY=$JWT_PRIVATE_KEY
+  
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+  
+            # Display the file to check its contents
+            cat $SERVICE_NAME
+      
+      - name: Transfer the .service file via SCP
+        run: |
+          # Use scp to securely copy the service file to the remote server
+          scp $SERVICE_NAME staging:/etc/systemd/system/$SERVICE_NAME
+          ssh staging << EOF
+          # Move the service file to the systemd folder
+          #sudo mv /home/${{ secrets.REMOTE_USER }}/my-service.service /etc/systemd/system/my-service.service
+          
+          # Reload systemd manager configuration
+          sudo systemctl daemon-reload
+          
+          # Restart the service
+          sudo systemctl restart $SERVICE_NAME
+          
+          # Enable the service to start on boot (optional)
+          sudo systemctl enable $SERVICE_NAME
+          EOF
+
