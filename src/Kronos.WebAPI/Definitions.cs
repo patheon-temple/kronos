@@ -1,4 +1,4 @@
-﻿namespace Zeus;
+﻿namespace Kronos.WebAPI;
 
 public static class Definitions
 {

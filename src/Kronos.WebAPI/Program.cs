@@ -1,11 +1,11 @@
 using Asp.Versioning;
+using Kronos.WebAPI.Athena.WebApi;
+using Kronos.WebAPI.Swagger;
+using Kronos.WebAPI.Zeus;
+using Kronos.WebAPI.Zeus.Endpoints;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using Zeus.Endpoints;
-using Zeus.Interop.Requests;
-using Zeus.Interop.Responses;
 using Zeus.Services;
-using Zeus.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,35 +43,26 @@ services.AddApiVersioning(
     .EnableApiVersionBinding();
 services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 services.AddSwaggerGen(options => options.OperationFilter<SwaggerDefaultValues>());
-services.AddScoped<TokenService>();
-
+ZeusServiceInstaller.Install(services);
+AthenaServiceInstaller.Install(services, builder.Configuration);
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI( options =>
+    app.UseSwaggerUI(options =>
     {
         var descriptions = app.DescribeApiVersions();
 
         // build a swagger endpoint for each discovered API version
-        foreach ( var description in descriptions )
+        foreach (var description in descriptions)
         {
             var url = $"/swagger/{description.GroupName}/swagger.json";
             var name = description.GroupName.ToUpperInvariant();
-            options.SwaggerEndpoint( url, name );
+            options.SwaggerEndpoint(url, name);
         }
-    } );
+    });
 }
-var tokens = app.NewVersionedApi( "tokens" );
-var tokensV1 = tokens.MapGroup( "/api/tokens" )
-    .HasApiVersion( 1.0 );
 
-tokensV1
-    .MapPost("/", AuthenticationEndpoints.Post)
-    .Accepts<AuthenticationPostRequest>("application/json")
-    .Produces<AuthenticationSuccessfulResponse>()
-    .Produces(400)
-    .ProducesValidationProblem()
-    .MapToApiVersion(1.0);
-
+ZeusEndpoints.Register(app);
+AthenaEndpoints.Register(app);
 app.Run();

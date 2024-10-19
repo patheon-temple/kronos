@@ -23,4 +23,8 @@
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.8.1"/>
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Zeus\WebApi\" />
+    </ItemGroup>
 </Project>

@@ -1,12 +1,11 @@
-﻿namespace Zeus.Swagger;
-
+﻿using System.Text;
 using Asp.Versioning.ApiExplorer;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Text;
+
+namespace Kronos.WebAPI.Swagger;
 
 /// <summary>
 /// Configures the Swagger generation options.
