@@ -1,0 +1,17 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  
+  "profiles": {
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7115;http://localhost:5108",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JWT_PRIVATE_KEY": "c26a54ded9ac3c9b43c55136bbb608f7c94086323ae779cd69d4a41ec14e77186fc0bb7d624e56af51599f155904ef91cfc011fcbc5a817ff294f6198787b46e707e3a7c37dbec443b683e923357d9156a7f2244ed8deb2ad6fc25f675217c4fd1aa0bb5ca674c158de30b5e782aa88a0fdf0ccf09d9f86aab5f0c8e949a4fc6ab03000d957b2c200b3f2222ac31407c421dbed979bf15f24f5ffb8d486e86e7fcd2a08268dfb5664ef9807558a6f6a6a809f1a8d9ae2c2e770c158b802cc1b03584d32007ce7e3060e833d961af1da761f28932d65e4b4814e90238ae619c16c5a375fe5fc7f353e2775e4b9959e002112ee1c4b943610d3ad0a425d755f2f8"
+      }
+    }
+  }
+}
