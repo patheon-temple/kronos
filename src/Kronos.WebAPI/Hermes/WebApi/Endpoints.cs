@@ -1,17 +1,16 @@
-﻿using Asp.Versioning.Builder;
+﻿using Kronos.WebAPI.Hermes.Services;
+using Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
+using Kronos.WebAPI.Hermes.WebApi.Interop.Responses;
 using Microsoft.AspNetCore.Mvc;
-using Zeus.Interop.Requests;
-using Zeus.Interop.Responses;
-using Zeus.Services;
 
-namespace Kronos.WebAPI.Zeus.Endpoints;
+namespace Kronos.WebAPI.Hermes.WebApi;
 
-public static class ZeusEndpoints
+public static class Endpoints
 {
     public static void Register(WebApplication app)
     {
-        var builder = app.NewVersionedApi("Zeus");
-        var tokensV1 = builder.MapGroup("/zeus/api").HasApiVersion(1.0);
+        var builder = app.NewVersionedApi("Hermes");
+        var tokensV1 = builder.MapGroup("/hermes/api").HasApiVersion(1.0);
        
         tokensV1
             .MapPost("/tokens", Tokens.Post)

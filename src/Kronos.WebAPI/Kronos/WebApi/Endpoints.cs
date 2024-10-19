@@ -1,17 +1,17 @@
 ﻿using System.Net.Mime;
-using Kronos.WebAPI.Athena.Domain;
-using Kronos.WebAPI.Athena.WebApi.Interop.Responses;
+using Kronos.WebAPI.Kronos.Domain;
+using Kronos.WebAPI.Kronos.WebApi.Interop.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace Kronos.WebAPI.Athena.WebApi;
+namespace Kronos.WebAPI.Kronos.WebApi;
 
-public static class AthenaEndpoints
+public static class Endpoints
 {
     public static void Register(WebApplication app)
     {
-        var builder = app.NewVersionedApi("Athena");
-        var v1 = builder.MapGroup("/athena/api/v{v:apiVersion}").HasApiVersion(1.0);
+        var builder = app.NewVersionedApi("Hermes");
+        var v1 = builder.MapGroup("/kronos/api/v{v:apiVersion}").HasApiVersion(1.0);
         v1.MapGet("/", Discovery.Get)
             .Produces<ServiceDiscoveryResponse>(200, MediaTypeNames.Application.Json)
             .WithDescription("Discovery endpoint for rest of the serices");
@@ -25,7 +25,7 @@ public static class AthenaEndpoints
             {
                 Zeus = new ServiceDescriptionResponse
                 {
-                    Url = options.Value.Zeus.Url
+                    Url = options.Value.Athena.Url
                 }
             });
         }

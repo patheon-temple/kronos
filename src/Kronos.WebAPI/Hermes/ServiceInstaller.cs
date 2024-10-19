@@ -1,8 +1,8 @@
-﻿using Zeus.Services;
+﻿using Kronos.WebAPI.Hermes.Services;
 
-namespace Kronos.WebAPI.Zeus;
+namespace Kronos.WebAPI.Hermes;
 
-public static class ZeusServiceInstaller
+public static class ServiceInstaller
 {
     public static void Install(IServiceCollection services)
     {

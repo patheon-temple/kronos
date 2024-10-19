@@ -1,4 +1,4 @@
-﻿namespace Kronos.WebAPI.Athena.WebApi.Interop.Responses;
+﻿namespace Kronos.WebAPI.Kronos.WebApi.Interop.Responses;
 
 public sealed class ServiceDescriptionResponse
 {

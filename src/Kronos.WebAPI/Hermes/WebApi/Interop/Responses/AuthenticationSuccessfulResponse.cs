@@ -1,4 +1,4 @@
-﻿namespace Zeus.Interop.Responses;
+﻿namespace Kronos.WebAPI.Hermes.WebApi.Interop.Responses;
 
 public sealed class AuthenticationSuccessfulResponse
 {
