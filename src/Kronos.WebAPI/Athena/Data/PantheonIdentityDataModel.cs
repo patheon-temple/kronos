@@ -1,6 +1,6 @@
-namespace Kronos.WebAPI.Athena.Domain;
+namespace Kronos.WebAPI.Athena.Data;
 
-public class PantheonIdentity
+public class PantheonIdentityDataModel
 {
     public Guid Id { get; set; }
     

@@ -6,17 +6,6 @@ public sealed class ServiceDescription
     public required string Description { get; set; }
 }
 
-public sealed class ServiceDiscovery
+public sealed class ServiceDiscovery : Dictionary<string, ServiceDescription>
 {
-    public ServiceDescription Athena { get; } = new()
-    {
-        Url = "",
-        Description = "Identities API"
-    };
-
-    public ServiceDescription Hermes { get; } = new()
-    {
-        Url = "",
-        Description = "Token API"
-    };
 }

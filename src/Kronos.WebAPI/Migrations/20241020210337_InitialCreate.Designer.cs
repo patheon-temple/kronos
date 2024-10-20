@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kronos.WebAPI.Migrations
 {
     [DbContext(typeof(AthenaDbContext))]
-    [Migration("20241019204410_InitialCreate")]
+    [Migration("20241020210337_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -26,15 +26,23 @@ namespace Kronos.WebAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Kronos.WebAPI.Athena.Domain.PantheonIdentity", b =>
+            modelBuilder.Entity("Kronos.WebAPI.Athena.Data.PantheonIdentityDataModel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
-                    b.HasKey("Id");
+                    b.Property<string>("DeviceId")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("device_id");
 
-                    b.ToTable("PantheonIdentities", "athena");
+                    b.HasKey("Id")
+                        .HasName("PK_pantheon_identities");
+
+                    b.ToTable("pantheon_identities", "athena");
                 });
 #pragma warning restore 612, 618
         }

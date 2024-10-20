@@ -1,4 +1,5 @@
-﻿using Asp.Versioning;
+﻿using System.Reflection;
+using Asp.Versioning;
 using Kronos.WebAPI.Kronos.Domain;
 using Kronos.WebAPI.Swagger;
 using Microsoft.Extensions.Options;
@@ -42,9 +43,16 @@ public static class ServiceInstaller
             // you should remove this configuration.
             .EnableApiVersionBinding();
         services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-        services.AddSwaggerGen(options => options.OperationFilter<SwaggerDefaultValues>());
+        services.AddSwaggerGen(options =>
+        {
+            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, 
+                $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+            options.OperationFilter<SwaggerDefaultValues>();
+        });
         
-        services.AddOptions<ServiceDiscovery>().BindConfiguration("Kronos:Discovery").ValidateDataAnnotations()
+        services.AddOptions<ServiceDiscovery>()
+            .BindConfiguration("Kronos:Discovery")
+            .ValidateDataAnnotations()
             .ValidateOnStart();
     }
 }

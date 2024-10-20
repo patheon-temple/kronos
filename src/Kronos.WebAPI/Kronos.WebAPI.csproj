@@ -7,17 +7,20 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DocumentationFile>bin\Debug\Zeus.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\Kronos.WebAPI.xml</DocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DocumentationFile>bin\Release\Zeus.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\Kronos.WebAPI.xml</DocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0"/>
+        <PackageReference Include="FluentValidation" Version="11.10.0" />
+        <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+        <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="6.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,6 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Athena\WebApi\Interop\Requests\" />
+      <Folder Include="Athena\Services\" />
+      <Folder Include="Kronos\WebApi\Interop\Responses\" />
     </ItemGroup>
 </Project>
