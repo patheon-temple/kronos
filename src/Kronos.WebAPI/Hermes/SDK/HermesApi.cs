@@ -11,8 +11,8 @@ internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService) : IHer
         if (string.IsNullOrWhiteSpace(deviceId))
             throw new ArgumentNullException(nameof(deviceId));
                         
-        var identity = await athenaApi.GetIdentityByDeviceIdAsync(deviceId, cancellationToken) ??
-                       await athenaApi.CreateIdentityByDeviceIdAsync(deviceId, CancellationToken.None);
+        var identity = await athenaApi.GetUserByDeviceIdAsync(deviceId, cancellationToken) ??
+                       await athenaApi.CreateUserFromDeviceIdAsync(deviceId, CancellationToken.None);
 
         var accessToken = tokenService.CreateAccessToken(new TokenCreationArgs
         {

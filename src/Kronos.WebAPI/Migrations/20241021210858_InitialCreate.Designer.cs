@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kronos.WebAPI.Migrations
 {
     [DbContext(typeof(AthenaDbContext))]
-    [Migration("20241020210337_InitialCreate")]
+    [Migration("20241021210858_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -26,12 +26,31 @@ namespace Kronos.WebAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Kronos.WebAPI.Athena.Data.PantheonIdentityDataModel", b =>
+            modelBuilder.Entity("Kronos.WebAPI.Athena.Data.ServiceAccountDataModel", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("ServiceId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnName("service_id");
+
+                    b.Property<byte[]>("Secret")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("bytea")
+                        .HasColumnName("secret");
+
+                    b.HasKey("ServiceId")
+                        .HasName("PK_service_account_id");
+
+                    b.ToTable("service_accounts", "athena");
+                });
+
+            modelBuilder.Entity("Kronos.WebAPI.Athena.Data.UserAccountDataModel", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
                     b.Property<string>("DeviceId")
                         .ValueGeneratedOnAdd()
@@ -39,10 +58,10 @@ namespace Kronos.WebAPI.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("device_id");
 
-                    b.HasKey("Id")
-                        .HasName("PK_pantheon_identities");
+                    b.HasKey("UserId")
+                        .HasName("PK_user_account_id");
 
-                    b.ToTable("pantheon_identities", "athena");
+                    b.ToTable("user_accounts", "athena");
                 });
 #pragma warning restore 612, 618
         }

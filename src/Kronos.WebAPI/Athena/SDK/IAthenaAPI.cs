@@ -5,8 +5,8 @@ namespace Kronos.WebAPI.Athena.SDK;
 
 public interface IAthenaApi
 {
-    Task<PantheonIdentity> CreateIdentityByDeviceIdAsync(string deviceId,
+    Task<PantheonIdentity> CreateUserFromDeviceIdAsync(string deviceId,
         CancellationToken cancellationToken = default);
 
-    Task<PantheonIdentity?> GetIdentityByDeviceIdAsync(string deviceId, CancellationToken cancellationToken = default);
+    Task<PantheonIdentity?> GetUserByDeviceIdAsync(string deviceId, CancellationToken cancellationToken = default);
 }
