@@ -9,3 +9,8 @@ services:
       - POSTGRES_PASSWORD=myPassword
       - POSTGRES_USER=root
       - POSTGRES_DB=pantheon
+    networks:
+      - kronos
+
+networks:
+  kronos:

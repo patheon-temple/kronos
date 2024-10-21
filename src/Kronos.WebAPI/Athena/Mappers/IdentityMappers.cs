@@ -5,9 +5,9 @@ namespace Kronos.WebAPI.Athena.Mappers;
 
 public static class IdentityMappers
 {
-    public static PantheonIdentity ToDomain(PantheonIdentityDataModel data) => new()
+    public static PantheonIdentity ToDomain(UserAccountDataModel data) => new()
     {
         DeviceId = data.DeviceId,
-        Id = data.Id
+        Id = data.UserId
     };
 }

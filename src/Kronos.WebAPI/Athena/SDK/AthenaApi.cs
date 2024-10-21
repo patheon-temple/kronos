@@ -8,7 +8,7 @@ namespace Kronos.WebAPI.Athena.SDK;
 
 internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactory) : IAthenaApi
 {
-    public async Task<PantheonIdentity> CreateIdentityByDeviceIdAsync(string deviceId,
+    public async Task<PantheonIdentity> CreateUserFromDeviceIdAsync(string deviceId,
         CancellationToken cancellationToken = default)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
@@ -17,7 +17,7 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
 
         if (identity is not null) return IdentityMappers.ToDomain(identity);
 
-        await db.AddAsync(identity = new PantheonIdentityDataModel
+        await db.AddAsync(identity = new UserAccountDataModel
         {
             DeviceId = deviceId
         }, cancellationToken);
@@ -26,7 +26,7 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         return IdentityMappers.ToDomain(identity);
     }
 
-    public async Task<PantheonIdentity?> GetIdentityByDeviceIdAsync(string deviceId,
+    public async Task<PantheonIdentity?> GetUserByDeviceIdAsync(string deviceId,
         CancellationToken cancellationToken = default)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);

@@ -1,4 +1,5 @@
-﻿using Kronos.WebAPI.Athena.SDK;
+﻿using FluentValidation;
+using Kronos.WebAPI.Athena.SDK;
 using Kronos.WebAPI.Hermes.SDK;
 using Kronos.WebAPI.Hermes.Services;
 using Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
@@ -27,27 +28,20 @@ public static class Endpoints
     {
         public static async Task<IResult> Post(
             [FromBody] AuthenticationPostRequest request,
+            [FromServices] IValidator<AuthenticationPostRequest> validator,
             [FromServices] IHermesApi hermesApi,
-            [FromServices] IAthenaApi athenaApi,
             CancellationToken cancellationToken = default)
         {
             switch (request.CredentialsType)
             {
                 case CredentialsType.DeviceId:
-                    if (string.IsNullOrWhiteSpace(request.DeviceId))
-                        return Results.ValidationProblem(new Dictionary<string, string[]>
-                        {
-                            {
-                                nameof(request.DeviceId),
-                                [$"Credentials type {CredentialsType.DeviceId} require  {nameof(request.DeviceId)}"]
-                            }
-                        });
+                    var validation = await validator.ValidateAsync(request, cancellationToken);
+                    if (!validation.IsValid)
+                    {
+                        return Results.ValidationProblem(validation.ToDictionary());
+                    }
 
-                    var identity = await athenaApi.GetIdentityByDeviceIdAsync(request.DeviceId, cancellationToken);
-                    
-                    if (identity is null) return Results.Unauthorized();
-                    
-                    var tokenSet = hermesApi.CreateTokenSetForIdentity(identity);
+                    var tokenSet = await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!, cancellationToken);
 
                     return Results.Ok(new AuthenticationSuccessfulResponse
                     {

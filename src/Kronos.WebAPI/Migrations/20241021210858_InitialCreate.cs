@@ -15,16 +15,29 @@ namespace Kronos.WebAPI.Migrations
                 name: "athena");
 
             migrationBuilder.CreateTable(
-                name: "pantheon_identities",
+                name: "service_accounts",
                 schema: "athena",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    service_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    secret = table.Column<byte[]>(type: "bytea", maxLength: 128, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_service_account_id", x => x.service_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "user_accounts",
+                schema: "athena",
+                columns: table => new
+                {
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     device_id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_pantheon_identities", x => x.id);
+                    table.PrimaryKey("PK_user_account_id", x => x.user_id);
                 });
         }
 
@@ -32,7 +45,11 @@ namespace Kronos.WebAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "pantheon_identities",
+                name: "service_accounts",
+                schema: "athena");
+
+            migrationBuilder.DropTable(
+                name: "user_accounts",
                 schema: "athena");
         }
     }

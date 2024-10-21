@@ -9,22 +9,16 @@ var services = builder.Services;
 services.AddValidatorsFromAssemblyContaining<Program>();
 services.AddFluentValidationRulesToSwagger();
 services.AddCors();
-services.AddAuthentication().AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-    };
-    
-    options.Audience = "https://api.example.com";
-    options.Authority = "https://api.example.com";
-    options.SaveToken = true;
-});
+services.AddAuthentication().AddJwtBearer().AddJwtBearer("");
+builder.Services.AddHealthChecks();
+
 Kronos.WebAPI.Kronos.ServiceInstaller.Install(services);
 Kronos.WebAPI.Hermes.ServiceInstaller.Install(services);
 Kronos.WebAPI.Athena.ServiceInstaller.Install(services, builder.Configuration);
 
 var app = builder.Build();
 app.UseCors(x=>x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+app.MapHealthChecks("/healthz");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

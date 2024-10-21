@@ -1,8 +1,8 @@
 namespace Kronos.WebAPI.Athena.Data;
 
-public class PantheonIdentityDataModel
+public class UserAccountDataModel
 {
-    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
     
     public string? DeviceId { get; set; }
 }
