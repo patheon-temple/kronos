@@ -1,7 +1,7 @@
-import type { IServiceDiscovery } from '@/services/kronos/kronos.service'
-import { assertSuccessStatusCode, throwErrorStatusCode } from '@/services/helpers'
+import { assertSuccessStatusCode } from '@/services/helpers'
+import type { IServiceDiscovery } from '@/services/models'
 
-export abstract class ServiceBase {
+export abstract class ApiBase {
   private readonly _serviceDiscovery: IServiceDiscovery
 
   protected constructor(serviceDiscovery: IServiceDiscovery) {
@@ -18,7 +18,7 @@ export abstract class ServiceBase {
 
   public async healthcheck(): Promise<boolean> {
     try {
-      const response = await fetch(this.composeUrl('/healthz'))
+      const response = await fetch(this._serviceDiscovery.healthcheckUrl)
       return assertSuccessStatusCode(response.status)
     } catch (error) {
       console.error(error)

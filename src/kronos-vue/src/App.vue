@@ -1,14 +1,7 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { KronosService } from '@/services/kronos/kronos.service'
 
-onMounted(async ()=>{
-  const kronos = new KronosService();
-  const services = await kronos.loadServiceDiscovery()
 
-  console.log(services?.Athena.description)
-  console.log(services?.Hermes.description)
-})
+import HealthcheckWidget from '@/components/HealthcheckWidget.vue'
 </script>
 
 <template>
@@ -17,9 +10,12 @@ onMounted(async ()=>{
   </p>
   <nav>
     <RouterLink to="/">Go to Home</RouterLink>
-    <RouterLink to="/Login">Go to About</RouterLink>
+    <RouterLink to="/login">Go to About</RouterLink>
   </nav>
   <main>
+<!--    <HealthcheckWidget name="Athena"/>-->
+    <HealthcheckWidget name="Hermes"/>
+    <HealthcheckWidget name="Athena"/>
     <RouterView />
   </main>
 </template>
