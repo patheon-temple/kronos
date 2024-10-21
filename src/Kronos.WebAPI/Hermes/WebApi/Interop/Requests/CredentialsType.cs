@@ -1,4 +1,4 @@
-﻿namespace Zeus.Interop.Requests;
+﻿namespace Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
 
 public enum CredentialsType
 {
