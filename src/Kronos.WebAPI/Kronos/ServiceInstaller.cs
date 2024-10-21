@@ -43,12 +43,7 @@ public static class ServiceInstaller
             // you should remove this configuration.
             .EnableApiVersionBinding();
         services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-        services.AddSwaggerGen(options =>
-        {
-            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, 
-                $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
-            options.OperationFilter<SwaggerDefaultValues>();
-        });
+        services.AddSwaggerGen();
         
         services.AddOptions<ServiceDiscovery>()
             .BindConfiguration("Kronos:Discovery")
