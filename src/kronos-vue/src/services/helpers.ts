@@ -1,4 +1,4 @@
-export const successStatusCode = (code: number) => {
+export const assertSuccessStatusCode = (code: number) => {
   return code >= 200 && code < 400
 }
 
