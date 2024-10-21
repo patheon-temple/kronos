@@ -16,13 +16,14 @@ public static class Endpoints
 
         identity
             .MapGet("/identities/me", Identities.GetMe)
-            .Produces<PantheonIdentityResponse>()
+            .Produces<CreateDeviceIdentityResponse>()
             .Produces(400)
             .ProducesValidationProblem()
-            .MapToApiVersion(1.0);
+            .MapToApiVersion(1.0)
+            .RequireAuthorization();
         identity
             .MapPost("/identities/authenticate/device", Identities.PostDeviceIdentityAsync)
-            .Produces<PantheonIdentityResponse>()
+            .Produces<CreateDeviceIdentityResponse>()
             .Produces(400)
             .ProducesValidationProblem()
             .MapToApiVersion(1.0);
@@ -48,7 +49,7 @@ internal static class Identities
         }
         
         var identity = await athenaApi.CreateIdentityByDeviceIdAsync(request.DeviceId);
-        return Results.Ok(new PantheonIdentityResponse
+        return Results.Ok(new CreateDeviceIdentityResponse
         {
             Id = identity.Id,
             DeviceId = identity.DeviceId

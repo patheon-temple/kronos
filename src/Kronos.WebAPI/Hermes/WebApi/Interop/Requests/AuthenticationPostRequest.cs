@@ -11,6 +11,6 @@ public sealed class AuthenticationPostRequest
     /// <summary>
     /// Unique device ID
     /// </summary>
-    /// <example>45dd14cd-cba8-4657-a170-d59e2fc9696c</example>
+    /// <example>00-B0-D0-63-C2-26</example>
     public  string? DeviceId { get; set; }
 }

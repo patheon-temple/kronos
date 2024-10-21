@@ -1,4 +1,6 @@
-﻿using Kronos.WebAPI.Hermes.Services;
+﻿using Kronos.WebAPI.Athena.SDK;
+using Kronos.WebAPI.Hermes.SDK;
+using Kronos.WebAPI.Hermes.Services;
 using Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
 using Kronos.WebAPI.Hermes.WebApi.Interop.Responses;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +13,7 @@ public static class Endpoints
     {
         var builder = app.NewVersionedApi("Hermes");
         var tokensV1 = builder.MapGroup("/hermes/api").HasApiVersion(1.0);
-       
+
         tokensV1
             .MapPost("/tokens", Tokens.Post)
             .Accepts<AuthenticationPostRequest>("application/json")
@@ -23,9 +25,10 @@ public static class Endpoints
 
     private static class Tokens
     {
-        public static IResult Post(
+        public static async Task<IResult> Post(
             [FromBody] AuthenticationPostRequest request,
-            [FromServices] TokenService tokenService,
+            [FromServices] IHermesApi hermesApi,
+            [FromServices] IAthenaApi athenaApi,
             CancellationToken cancellationToken = default)
         {
             switch (request.CredentialsType)
@@ -39,15 +42,16 @@ public static class Endpoints
                                 [$"Credentials type {CredentialsType.DeviceId} require  {nameof(request.DeviceId)}"]
                             }
                         });
-                
-                    var accessToken = tokenService.CreateAccessToken(new TokenCreationArgs
-                    {
-                        DeviceId = request.DeviceId,
-                    });
-                
+
+                    var identity = await athenaApi.GetIdentityByDeviceIdAsync(request.DeviceId, cancellationToken);
+                    
+                    if (identity is null) return Results.Unauthorized();
+                    
+                    var tokenSet = hermesApi.CreateTokenSetForIdentity(identity);
+
                     return Results.Ok(new AuthenticationSuccessfulResponse
                     {
-                        AccessToken = accessToken
+                        AccessToken = tokenSet.AccessToken
                     });
                 case CredentialsType.Unknown:
                 default:
@@ -57,6 +61,5 @@ public static class Endpoints
                 }
             }
         }
-        
     }
 }

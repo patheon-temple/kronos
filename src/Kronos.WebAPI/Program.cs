@@ -1,5 +1,7 @@
 using FluentValidation;
+using Kronos.WebAPI.Hermes.SDK;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +9,16 @@ var services = builder.Services;
 services.AddValidatorsFromAssemblyContaining<Program>();
 services.AddFluentValidationRulesToSwagger();
 services.AddCors();
-
+services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+    };
+    
+    options.Audience = "https://api.example.com";
+    options.Authority = "https://api.example.com";
+    options.SaveToken = true;
+});
 Kronos.WebAPI.Kronos.ServiceInstaller.Install(services);
 Kronos.WebAPI.Hermes.ServiceInstaller.Install(services);
 Kronos.WebAPI.Athena.ServiceInstaller.Install(services, builder.Configuration);
@@ -30,7 +41,7 @@ if (app.Environment.IsDevelopment())
         }
     });
 }
-
+app.UsePantheonRequestContext();
 Kronos.WebAPI.Athena.WebApi.Endpoints.Register(app);
 Kronos.WebAPI.Hermes.WebApi.Endpoints.Register(app);
 Kronos.WebAPI.Kronos.WebApi.Endpoints.Register(app);

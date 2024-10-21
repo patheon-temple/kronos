@@ -7,4 +7,6 @@ public interface IAthenaApi
 {
     Task<PantheonIdentity> CreateIdentityByDeviceIdAsync(string deviceId,
         CancellationToken cancellationToken = default);
+
+    Task<PantheonIdentity?> GetIdentityByDeviceIdAsync(string deviceId, CancellationToken cancellationToken = default);
 }

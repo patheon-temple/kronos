@@ -8,6 +8,7 @@ namespace Kronos.WebAPI.Hermes.Services;
 public sealed class TokenCreationArgs
 {
     public string? DeviceId { get; set; }
+    public Guid UserId { get; set; }
 }
 
 public class TokenService
@@ -24,8 +25,10 @@ public class TokenService
 
         IEnumerable<Claim?> enumerable =
         [
-            string.IsNullOrWhiteSpace(args.DeviceId) ? null : new Claim(Definitions.ClaimTypes.DeviceId, args.DeviceId)
+            string.IsNullOrWhiteSpace(args.DeviceId) ? null : new Claim(Definitions.ClaimTypes.DeviceId, args.DeviceId),
+            new Claim(ClaimTypes.Name, args.UserId.ToString("N"))
         ];
+        
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             SigningCredentials = credentials,

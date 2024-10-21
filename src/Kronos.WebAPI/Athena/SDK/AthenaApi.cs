@@ -16,7 +16,7 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
             entity => entity.DeviceId != null && entity.DeviceId.Equals(deviceId), cancellationToken);
 
         if (identity is not null) return IdentityMappers.ToDomain(identity);
-        
+
         await db.AddAsync(identity = new PantheonIdentityDataModel
         {
             DeviceId = deviceId
@@ -24,5 +24,14 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         await db.SaveChangesAsync(cancellationToken);
 
         return IdentityMappers.ToDomain(identity);
+    }
+
+    public async Task<PantheonIdentity?> GetIdentityByDeviceIdAsync(string deviceId,
+        CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var entity = await db.PantheonIdentities.FirstOrDefaultAsync(
+            x => x.DeviceId != null && x.DeviceId.Equals(deviceId), cancellationToken: cancellationToken);
+        return entity is null ? null : IdentityMappers.ToDomain(entity);
     }
 }
