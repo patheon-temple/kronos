@@ -35,6 +35,8 @@
 
     <ItemGroup>
       <Folder Include="Athena\Services\" />
+      <Folder Include="Athena\WebApi\Interop\Requests\" />
+      <Folder Include="Athena\WebApi\Interop\Responses\" />
       <Folder Include="Kronos\WebApi\Interop\Responses\" />
     </ItemGroup>
 </Project>

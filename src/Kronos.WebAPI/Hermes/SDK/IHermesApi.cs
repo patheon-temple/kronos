@@ -9,5 +9,5 @@ public sealed class TokenSet
 
 public interface IHermesApi
 {
-    TokenSet CreateTokenSetForIdentity(PantheonIdentity identity);
+    Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, CancellationToken cancellationToken);
 }
