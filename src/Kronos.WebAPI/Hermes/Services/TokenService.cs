@@ -27,7 +27,7 @@ public class TokenService(IOptions<JwtConfig> options)
         IEnumerable<Claim?> enumerable =
         [
             string.IsNullOrWhiteSpace(args.DeviceId) ? null : new Claim(Definitions.ClaimTypes.DeviceId, args.DeviceId),
-            new Claim(ClaimTypes.Name, args.UserId.ToString("N"))
+            new(ClaimTypes.Name, args.UserId.ToString("N"))
         ];
         
         var tokenDescriptor = new SecurityTokenDescriptor

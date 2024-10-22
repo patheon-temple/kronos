@@ -23,7 +23,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Panel :header="name" toggleable>
+  <Panel :header="name" toggleable collapsed>
     <template #icons>
       <i class="pi pi-heart-fill" v-if="isHealthy"></i>
       <i class="pi pi-heart" v-else></i>
