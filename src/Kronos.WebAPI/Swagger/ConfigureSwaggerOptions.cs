@@ -40,7 +40,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
                               """,
                 Name = "Authorization",
                 In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
+                Type = SecuritySchemeType.Http,
                 Scheme = "Bearer"
             });
             options.AddSecurityRequirement(new OpenApiSecurityRequirement()
@@ -53,7 +53,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
                             Type = ReferenceType.SecurityScheme,
                             Id = "Bearer"
                         },
-                        Scheme = "oauth2",
+                        Scheme = "Bearer",
                         Name = "Bearer",
                         In = ParameterLocation.Header,
 

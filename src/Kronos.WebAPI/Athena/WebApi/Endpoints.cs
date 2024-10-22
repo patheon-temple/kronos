@@ -5,9 +5,9 @@ public static class Endpoints
     public static void Register(WebApplication app)
     {
         var builder = app.NewVersionedApi("Athena");
-        var identity = builder.MapGroup("/athena/api").HasApiVersion(1.0);
+        var apiV1 = builder.MapGroup("/athena/api/v{version:apiVersion}").HasApiVersion(1.0);
 
-        identity
+        apiV1
             .MapGet("/identities/me", Identities.GetMe)
             .MapToApiVersion(1.0)
             .RequireAuthorization();

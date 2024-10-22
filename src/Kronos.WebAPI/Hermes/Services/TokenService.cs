@@ -1,6 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Kronos.WebAPI.Hermes.WebApi;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Kronos.WebAPI.Hermes.Services;
@@ -11,16 +13,15 @@ public sealed class TokenCreationArgs
     public Guid UserId { get; set; }
 }
 
-public class TokenService
+public class TokenService(IOptions<JwtConfig> options)
 {
     public string CreateAccessToken(TokenCreationArgs args)
     {
         var handler = new JwtSecurityTokenHandler();
 
-        var privateKey = Environment.GetEnvironmentVariable("JWT_PRIVATE_KEY") ?? throw new Exception("Missing JWT_PRIVATE_KEY");
 
         var credentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(privateKey)),
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.Key)),
             SecurityAlgorithms.HmacSha256);
 
         IEnumerable<Claim?> enumerable =
@@ -35,7 +36,9 @@ public class TokenService
             Expires = DateTime.UtcNow.AddHours(1),
             Subject = new ClaimsIdentity(
                 enumerable.Where(x => x is not null).Cast<Claim>()
-            )
+            ),
+            Audience = options.Value.Audience,
+            Issuer = options.Value.Issuer
         };
 
         var token = handler.CreateToken(tokenDescriptor);

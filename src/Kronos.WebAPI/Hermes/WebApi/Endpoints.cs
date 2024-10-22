@@ -13,9 +13,9 @@ public static class Endpoints
     public static void Register(WebApplication app)
     {
         var builder = app.NewVersionedApi("Hermes");
-        var tokensV1 = builder.MapGroup("/hermes/api").HasApiVersion(1.0);
+        var apiV1 = builder.MapGroup("/hermes/api/v{version:apiVersion}").HasApiVersion(1.0);
 
-        tokensV1
+        apiV1
             .MapPost("/tokens", Tokens.Post)
             .Accepts<AuthenticationPostRequest>("application/json")
             .Produces<AuthenticationSuccessfulResponse>()
