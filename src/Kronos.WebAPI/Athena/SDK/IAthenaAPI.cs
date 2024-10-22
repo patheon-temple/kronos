@@ -1,5 +1,4 @@
 using Kronos.WebAPI.Athena.Domain;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Kronos.WebAPI.Athena.SDK;
 
@@ -9,4 +8,7 @@ public interface IAthenaApi
         CancellationToken cancellationToken = default);
 
     Task<PantheonIdentity?> GetUserByDeviceIdAsync(string deviceId, CancellationToken cancellationToken = default);
+    
+    Task<bool> DoesUsernameExistAsync(string username, CancellationToken cancellationToken = default);
+    Task<PantheonIdentity> CreateUserFromUsernameAsync(string username, string password, CancellationToken stoppingToken = default);
 }

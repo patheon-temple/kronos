@@ -5,4 +5,5 @@ public class UserAccountDataModel
     public Guid UserId { get; set; }
     
     public string? DeviceId { get; set; }
+    public string? Username { get; set; }
 }

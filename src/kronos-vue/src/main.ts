@@ -8,6 +8,7 @@ import Aura from '@primevue/themes/aura'
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '@/components/DashboardView.vue'
 import LoginView from '@/components/LoginView.vue'
+import ToastService from 'primevue/toastservice';
 
 const routes = [
   { path: '/', component: DashboardView },
@@ -23,9 +24,17 @@ const app = createApp(App)
 
 app.use(PrimeVue, {
   theme: {
-    preset: Aura
+    preset: Aura,
+    options: {
+      cssLayer: {
+        name: 'primevue',
+        order: 'tailwind-base, primevue, tailwind-utilities'
+      }
+    }
   }
-}).use(router)
+})
+  .use(router)
+  .use(ToastService)
   .use(createPinia())
 
 app.mount('#app')

@@ -12,7 +12,7 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         CancellationToken cancellationToken = default)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var identity = await db.PantheonIdentities.FirstOrDefaultAsync(
+        var identity = await db.UserAccounts.FirstOrDefaultAsync(
             entity => entity.DeviceId != null && entity.DeviceId.Equals(deviceId), cancellationToken);
 
         if (identity is not null) return IdentityMappers.ToDomain(identity);
@@ -30,8 +30,22 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         CancellationToken cancellationToken = default)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var entity = await db.PantheonIdentities.FirstOrDefaultAsync(
+        var entity = await db.UserAccounts.FirstOrDefaultAsync(
             x => x.DeviceId != null && x.DeviceId.Equals(deviceId), cancellationToken: cancellationToken);
         return entity is null ? null : IdentityMappers.ToDomain(entity);
+    }
+
+    public async Task<bool> DoesUsernameExistAsync(string username, CancellationToken cancellationToken = default)
+    {
+        username = username.ToLower();
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await db.UserAccounts.AnyAsync(x => x.Username != null && x.Username.Equals(username),
+            cancellationToken);
+    }
+
+    public Task<PantheonIdentity> CreateUserFromUsernameAsync(string username, string password, CancellationToken stoppingToken = default)
+    {
+        username = username.ToLower();
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
     }
 }
