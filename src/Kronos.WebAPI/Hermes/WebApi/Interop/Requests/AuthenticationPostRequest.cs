@@ -16,6 +16,19 @@ public sealed class AuthenticationPostRequest
                         .MinimumLength(12)
                         .MaximumLength(128);
                 });
+            
+            When(x => x.CredentialsType == CredentialsType.Password,
+                () =>
+                {
+                    RuleFor(x => x.Username)
+                        .NotNull()
+                        .MinimumLength(6)
+                        .MaximumLength(128);
+                    RuleFor(x => x.Password)
+                        .NotNull()
+                        .MinimumLength(6)
+                        .MaximumLength(128);
+                });
         }
     }
 
@@ -30,4 +43,7 @@ public sealed class AuthenticationPostRequest
     /// </summary>
     /// <example>00-B0-D0-63-C2-26</example>
     public string? DeviceId { get; set; }
+
+    public string? Username { get; set; }
+    public string? Password { get; set; }
 }
