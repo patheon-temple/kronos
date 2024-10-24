@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using Kronos.WebAPI.Athena.Crypto;
 using Kronos.WebAPI.Athena.Data;
 using Kronos.WebAPI.Athena.Domain;
 using Kronos.WebAPI.Athena.Infrastructure;
@@ -43,9 +45,37 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
             cancellationToken);
     }
 
-    public Task<PantheonIdentity> CreateUserFromUsernameAsync(string username, string password, CancellationToken stoppingToken = default)
+    public async Task<PantheonIdentity> CreateUserFromUsernameAsync(string username, string password,
+        CancellationToken cancellationToken = default)
     {
         username = username.ToLower();
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var entity = new UserAccountDataModel
+        {
+            DeviceId = null,
+            Username = username,
+            PasswordHash = Passwords.HashPassword(password)
+        };
+        db.UserAccounts.Add(entity);
+
+        await db.SaveChangesAsync(cancellationToken);
+        return IdentityMappers.ToDomain(entity);
+    }
+
+    public async Task<PantheonIdentity?> GetUserByUsernameAsync(string username,
+        CancellationToken cancellationToken = default)
+    {
+        username = username.ToLower();
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var data = await db.UserAccounts
+            .FirstOrDefaultAsync(x => x.Username != null && x.Username.Equals(username),
+            cancellationToken: cancellationToken);
+
+        return data is null ? null : IdentityMappers.ToDomain(data);
+    }
+
+    public Task<bool> VerifyPasswordAsync(byte[] passwordHash, string password, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

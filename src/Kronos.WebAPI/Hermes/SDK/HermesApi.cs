@@ -1,5 +1,6 @@
-using Kronos.WebAPI.Athena.Domain;
+using System.Security;
 using Kronos.WebAPI.Athena.SDK;
+using Kronos.WebAPI.Hermes.Exceptions;
 using Kronos.WebAPI.Hermes.Services;
 
 namespace Kronos.WebAPI.Hermes.SDK;
@@ -8,9 +9,7 @@ internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService) : IHer
 {
     public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(deviceId))
-            throw new ArgumentNullException(nameof(deviceId));
-                        
+        ArgumentException.ThrowIfNullOrWhiteSpace(deviceId);
         var identity = await athenaApi.GetUserByDeviceIdAsync(deviceId, cancellationToken) ??
                        await athenaApi.CreateUserFromDeviceIdAsync(deviceId, CancellationToken.None);
 
@@ -18,6 +17,40 @@ internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService) : IHer
         {
             DeviceId = identity.DeviceId,
             UserId = identity.Id
+        });
+
+        return new TokenSet
+        {
+            AccessToken = accessToken
+        };
+    }
+
+    public async Task<TokenSet> CreateTokenSetForUserCredentialsAsync(string username, string password,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(username);
+        ArgumentException.ThrowIfNullOrWhiteSpace(password);
+
+        var identity = await athenaApi.GetUserByUsernameAsync(username, cancellationToken);
+
+        if (identity is null)
+            throw new UserNotFoundExistException
+            {
+                Data = { { "username", username } }
+            };
+
+        if (identity.PasswordHash == null) throw new SecurityException();
+
+        if (!await athenaApi.VerifyPasswordAsync(identity.PasswordHash, password, cancellationToken))
+        {
+            throw new SecurityException();
+        }
+
+        var accessToken = tokenService.CreateAccessToken(new TokenCreationArgs
+        {
+            UserId = identity.Id,
+            Username = username,
+            IsVerified = false
         });
 
         return new TokenSet

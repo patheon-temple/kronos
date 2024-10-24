@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Text;
+using FluentValidation;
 using Kronos.WebAPI.Athena.SDK;
 using Kronos.WebAPI.Hermes.SDK;
 using Kronos.WebAPI.Hermes.Services;
@@ -32,21 +33,40 @@ public static class Endpoints
             [FromServices] IHermesApi hermesApi,
             CancellationToken cancellationToken = default)
         {
+            var validation = await validator.ValidateAsync(request, cancellationToken);
+            if (!validation.IsValid)
+            {
+                return Results.ValidationProblem(validation.ToDictionary());
+            }
+
             switch (request.CredentialsType)
             {
                 case CredentialsType.DeviceId:
-                    var validation = await validator.ValidateAsync(request, cancellationToken);
-                    if (!validation.IsValid)
-                    {
-                        return Results.ValidationProblem(validation.ToDictionary());
-                    }
-
+                {
                     var tokenSet = await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!, cancellationToken);
-
                     return Results.Ok(new AuthenticationSuccessfulResponse
                     {
                         AccessToken = tokenSet.AccessToken
                     });
+                }
+                case CredentialsType.Password:
+                {
+                    var bytes = new byte[128];
+                    if (!Convert.TryFromBase64String(request.Password!, bytes, out var written))
+                    {
+                        return Results.ValidationProblem(new Dictionary<string, string[]>
+                        {
+                            { nameof(request.Password), ["Password has invalid format"] }
+                        });
+                    }
+
+                    var tokenSet = await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
+                        Encoding.UTF8.GetString(bytes[..written]), cancellationToken);
+                    return Results.Ok(new AuthenticationSuccessfulResponse
+                    {
+                        AccessToken = tokenSet.AccessToken
+                    });
+                }
                 case CredentialsType.Unknown:
                 default:
                 {

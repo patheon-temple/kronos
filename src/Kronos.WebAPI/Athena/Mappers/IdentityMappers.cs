@@ -8,6 +8,7 @@ public static class IdentityMappers
     public static PantheonIdentity ToDomain(UserAccountDataModel data) => new()
     {
         DeviceId = data.DeviceId,
-        Id = data.UserId
+        Id = data.UserId,
+        PasswordHash = data.PasswordHash
     };
 }

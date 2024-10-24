@@ -37,6 +37,11 @@ public sealed class AthenaDbContext(DbContextOptions<AthenaDbContext> options) :
             .HasMaxLength(128)
             .ValueGeneratedOnAdd();
         
+        modelBuilder.Entity<UserAccountDataModel>()
+            .Property(b => b.PasswordHash)
+            .HasColumnName("password_hash")
+            .ValueGeneratedOnAdd();
+        
         
         modelBuilder.Entity<ServiceAccountDataModel>()
             .ToTable("service_accounts");

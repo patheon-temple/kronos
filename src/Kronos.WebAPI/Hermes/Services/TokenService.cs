@@ -11,6 +11,8 @@ public sealed class TokenCreationArgs
 {
     public string? DeviceId { get; set; }
     public Guid UserId { get; set; }
+    public string? Username { get; set; }
+    public bool IsVerified { get; set; }
 }
 
 public class TokenService(IOptions<JwtConfig> options)
@@ -27,7 +29,8 @@ public class TokenService(IOptions<JwtConfig> options)
         IEnumerable<Claim?> enumerable =
         [
             string.IsNullOrWhiteSpace(args.DeviceId) ? null : new Claim(Definitions.ClaimTypes.DeviceId, args.DeviceId),
-            new(ClaimTypes.Name, args.UserId.ToString("N"))
+            string.IsNullOrWhiteSpace(args.Username) ? null : new Claim(JwtRegisteredClaimNames.Nickname, args.Username),
+            new Claim(ClaimTypes.Name, args.UserId.ToString("N"))
         ];
         
         var tokenDescriptor = new SecurityTokenDescriptor

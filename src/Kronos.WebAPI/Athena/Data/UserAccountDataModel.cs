@@ -6,4 +6,5 @@ public class UserAccountDataModel
     
     public string? DeviceId { get; set; }
     public string? Username { get; set; }
+    public byte[]? PasswordHash { get; set; }
 }
