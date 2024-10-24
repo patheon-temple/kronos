@@ -1,5 +1,5 @@
 import './assets/main.css'
-
+import Ripple from 'primevue/ripple';
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
@@ -31,10 +31,12 @@ app.use(PrimeVue, {
         order: 'tailwind-base, primevue, tailwind-utilities'
       }
     }
-  }
+  },
+  ripple: true
 })
   .use(router)
   .use(ToastService)
   .use(createPinia())
+app.directive('ripple', Ripple);
 
 app.mount('#app')

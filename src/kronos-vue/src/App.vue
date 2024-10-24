@@ -5,11 +5,8 @@ import { ref } from 'vue'
 import type { MenuItem } from 'primevue/menuitem'
 
 import Toast from 'primevue/toast';
-import { useUserStore } from '@/stores/user.store'
 import LoginView from '@/components/LoginView.vue'
 
-
-const userStore = useUserStore()
 const menuItems = ref<MenuItem[]>([
   {
     label: 'Home',
