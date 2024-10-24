@@ -1,7 +1,15 @@
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using FluentValidation;
+using Kronos.WebAPI.Athena.Definitions;
 
 namespace Kronos.WebAPI.Athena.Crypto;
+
+public sealed class UserCredentialsValidationParams
+{
+    public string? Username { get; set; }
+    public string? Password { get; set; }
+}
 
 public static partial class Passwords
 {
@@ -10,6 +18,23 @@ public static partial class Passwords
     private const int IterationsCount = 1000;
     private const int Offset = 1;
     private static int HashSize => Offset + SaltSize + KeySize;
+
+
+    public static IValidator<UserCredentialsValidationParams> CreateValidator()
+    {
+        return new InlineValidator<UserCredentialsValidationParams>
+        {
+            v => v.RuleFor(x => x.Username)
+                .NotNull()
+                .MaximumLength(UserCredentialsDefinitions.UsernameMaxLength)
+                .MinimumLength(UserCredentialsDefinitions.UsernameMinLength),
+            v => v.RuleFor(x => x.Password)
+                .NotNull()
+                .MaximumLength(UserCredentialsDefinitions.PasswordMaxLength)
+                .MinimumLength(UserCredentialsDefinitions.PasswordMinLength)
+                .Must(pwd => ComplexityRegex().IsMatch(pwd))
+        };
+    }
 
     public static byte[] HashPassword(string password)
     {
@@ -59,13 +84,6 @@ public static partial class Passwords
         return storedKey.SequenceEqual(generatedKey);
     }
 
-    [GeneratedRegex(@"^ # start of line
-(?=(?:.*[A-Z]){2,}) # 2 upper case letters
-(?=(?:.*[a-z]){2,}) # 2 lower case letters
-(?=(?:.*\d){2,}) # 2 digits
-(?=(?:.*[!@#$%^&*()\-_=+{};:,<.>]){2,}) # 2 special characters
-(?!.*(.)\1{2}) # negative lookahead, dont allow more than 2 repeating characters
-([A-Za-z0-9!@#$%^&*()\-_=+{};:,<.>]{12,20}) # length 12-20, only above char classes (disallow spaces)
-$ # end of line", RegexOptions.Compiled)]
+    [GeneratedRegex(@"^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?])(?=.*[a-z])[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?]{7,128}$", RegexOptions.Compiled)]
     private static partial Regex ComplexityRegex();
 }

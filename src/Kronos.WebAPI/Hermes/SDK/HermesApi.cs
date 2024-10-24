@@ -41,7 +41,7 @@ internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService) : IHer
 
         if (identity.PasswordHash == null) throw new SecurityException();
 
-        if (!await athenaApi.VerifyPasswordAsync(identity.PasswordHash, password, cancellationToken))
+        if (!await athenaApi.VerifyPasswordAsync(identity.Id, password, cancellationToken))
         {
             throw new SecurityException();
         }

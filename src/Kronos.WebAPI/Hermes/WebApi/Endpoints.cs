@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using FluentValidation;
+using Kronos.WebAPI.Athena.Crypto;
 using Kronos.WebAPI.Athena.SDK;
 using Kronos.WebAPI.Hermes.SDK;
 using Kronos.WebAPI.Hermes.Services;
@@ -29,11 +30,16 @@ public static class Endpoints
     {
         public static async Task<IResult> Post(
             [FromBody] AuthenticationPostRequest request,
-            [FromServices] IValidator<AuthenticationPostRequest> validator,
             [FromServices] IHermesApi hermesApi,
             CancellationToken cancellationToken = default)
         {
-            var validation = await validator.ValidateAsync(request, cancellationToken);
+            var validation = await Passwords.CreateValidator().ValidateAsync(new
+                UserCredentialsValidationParams
+                {
+                    Password = request.Password,
+                    Username = request.Username,
+                }, cancellationToken);
+            
             if (!validation.IsValid)
             {
                 return Results.ValidationProblem(validation.ToDictionary());
@@ -51,17 +57,8 @@ public static class Endpoints
                 }
                 case CredentialsType.Password:
                 {
-                    var bytes = new byte[128];
-                    if (!Convert.TryFromBase64String(request.Password!, bytes, out var written))
-                    {
-                        return Results.ValidationProblem(new Dictionary<string, string[]>
-                        {
-                            { nameof(request.Password), ["Password has invalid format"] }
-                        });
-                    }
-
                     var tokenSet = await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
-                        Encoding.UTF8.GetString(bytes[..written]), cancellationToken);
+                        request.Password!, cancellationToken);
                     return Results.Ok(new AuthenticationSuccessfulResponse
                     {
                         AccessToken = tokenSet.AccessToken

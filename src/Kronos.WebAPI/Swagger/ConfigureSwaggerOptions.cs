@@ -61,8 +61,11 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
                     new List<string>()
                 }
             });
-            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, 
-                $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+            var filePath = Path.Combine(AppContext.BaseDirectory, 
+                $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
+            options.IncludeXmlComments(filePath);
+            options.IncludeGrpcXmlComments(filePath, includeControllerXmlComments: true);
+
         }
     }
 

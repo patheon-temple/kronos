@@ -1,37 +1,7 @@
-﻿using FluentValidation;
-
-namespace Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
+﻿namespace Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
 
 public sealed class AuthenticationPostRequest
 {
-    public sealed class Validator : AbstractValidator<AuthenticationPostRequest>
-    {
-        public Validator()
-        {
-            When(x => x.CredentialsType == CredentialsType.DeviceId,
-                () =>
-                {
-                    RuleFor(x => x.DeviceId)
-                        .NotNull()
-                        .MinimumLength(12)
-                        .MaximumLength(128);
-                });
-            
-            When(x => x.CredentialsType == CredentialsType.Password,
-                () =>
-                {
-                    RuleFor(x => x.Username)
-                        .NotNull()
-                        .MinimumLength(6)
-                        .MaximumLength(128);
-                    RuleFor(x => x.Password)
-                        .NotNull()
-                        .MinimumLength(6)
-                        .MaximumLength(128);
-                });
-        }
-    }
-
     /// <summary>
     /// Type of credentials
     /// </summary>

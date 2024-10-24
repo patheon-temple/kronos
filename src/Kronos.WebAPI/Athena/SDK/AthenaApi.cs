@@ -74,9 +74,18 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         return data is null ? null : IdentityMappers.ToDomain(data);
     }
 
-    public Task<bool> VerifyPasswordAsync(byte[] passwordHash, string password, CancellationToken cancellationToken)
+    public async Task<bool> VerifyPasswordAsync(Guid userId, string password,
+        CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
-        return Task.FromResult(passwordHash.Length > 0 && Passwords.VerifyHashedPassword(passwordHash, password));
+        
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        
+        var passwordHash = await db.UserAccounts.Where(x => x.UserId == userId).Select(x => x.PasswordHash)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        
+        if (passwordHash is null) return false;
+        
+        return passwordHash.Length > 0 && Passwords.VerifyHashedPassword(passwordHash, password);
     }
 }

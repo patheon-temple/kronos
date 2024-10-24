@@ -6,6 +6,7 @@ public sealed class PantheonRequestContext
 {
     public Guid? UserId { get; set; }
     public string? Username { get; set; }
+    public bool IsAuthenticated => UserId is not null && UserId.Value != Guid.Empty;
 }
 
 public static class RequestContextMiddleware
@@ -21,10 +22,11 @@ public static class RequestContextMiddleware
                 .Name;
 
             if (identityName is null || !Guid.TryParse(identityName, out var id)) return @delegate.Invoke();
+            
             var requestContext = context.RequestServices.GetRequiredService<PantheonRequestContext>();
             requestContext.UserId = id;
-            requestContext.Username = principal?.Claims.FirstOrDefault(x=>x.Type.Equals(JwtRegisteredClaimNames.Nickname))?.Value;
-
+            requestContext.Username = principal?.Claims
+                .FirstOrDefault(x => x.Type.Equals(JwtRegisteredClaimNames.Nickname))?.Value;
             return @delegate.Invoke();
         });
     }
