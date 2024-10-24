@@ -6,18 +6,29 @@ using Pantheon.Athena.Grpc;
 
 namespace Kronos.WebAPI.Athena.WebApi.GrpcServices;
 
-public class AthenaApiGrpcService(IAthenaApi athenaApi, PantheonRequestContext requestContext) : AthenaApiGrpc.AthenaApiGrpcBase
+public class AthenaApiGrpcService(IAthenaApi athenaApi, PantheonRequestContext requestContext)
+    : AthenaApiGrpc.AthenaApiGrpcBase
 {
+    public override async Task<PantheonIdentity> GetUserById(GetUserByIdRequest request, ServerCallContext context)
+    {
+        AuthenticatedOrThrow();
+        var identity = await athenaApi.GetUserByIdAsync(new Guid(request.UserId.ToByteArray()), context.CancellationToken);
+        return ProcessRequestInternally(identity);
+    }
+
     public override async Task<PantheonIdentity> CreateUserFromDeviceId(CreateUserFromDeviceIdRequest request,
         ServerCallContext context)
     {
+        AuthenticatedOrThrow();
         var identity = await athenaApi.CreateUserFromDeviceIdAsync(request.DeviceId, context.CancellationToken);
         return IdentityMappers.ToGrpc(identity);
     }
 
+
     public override async Task<VerifyPasswordResponse> VerifyPassword(VerifyPasswordRequest request,
         ServerCallContext context)
     {
+        AuthenticatedOrThrow();
         var isValid =
             await athenaApi.VerifyPasswordAsync(new Guid(request.UserId.ToByteArray()), request.Password,
                 context.CancellationToken);
@@ -30,6 +41,7 @@ public class AthenaApiGrpcService(IAthenaApi athenaApi, PantheonRequestContext r
     public override async Task<DoesUsernameExistResponse> DoesUsernameExist(DoesUsernameExistRequest request,
         ServerCallContext context)
     {
+        AuthenticatedOrThrow();
         var doesExists = await athenaApi.DoesUsernameExistAsync(request.Username, context.CancellationToken);
 
         return new DoesUsernameExistResponse
@@ -41,6 +53,7 @@ public class AthenaApiGrpcService(IAthenaApi athenaApi, PantheonRequestContext r
     public override async Task<PantheonIdentity> CreateUserFromUsername(CreateUserFromUsernameRequest request,
         ServerCallContext context)
     {
+        AuthenticatedOrThrow();
         var identity =
             await athenaApi.CreateUserFromUsernameAsync(request.Username, request.Password, context.CancellationToken);
         return IdentityMappers.ToGrpc(identity);
@@ -49,28 +62,36 @@ public class AthenaApiGrpcService(IAthenaApi athenaApi, PantheonRequestContext r
     public override async Task<PantheonIdentity> GetUserByUsername(GetUserByUsernameRequest request,
         ServerCallContext context)
     {
+        AuthenticatedOrThrow();
+        var identity = await athenaApi.GetUserByUsernameAsync(request.Username, context.CancellationToken);
+        return ProcessRequestInternally(identity);
+    }
+
+    public override async Task<PantheonIdentity> GetUserByDeviceId(GetUserByDeviceIdRequest request,
+        ServerCallContext context)
+    {
+        AuthenticatedOrThrow();
+        var identity = await athenaApi.GetUserByDeviceIdAsync(request.DeviceId, context.CancellationToken);
+        return ProcessRequestInternally(identity);
+    }
+
+    private void AuthenticatedOrThrow()
+    {
         if (!requestContext.IsAuthenticated)
         {
             throw new RpcException(new Status(StatusCode.Unauthenticated, "Unauthenticated"));
         }
-
-        var identity = await athenaApi.GetUserByUsernameAsync(request.Username, context.CancellationToken);
-        
-        if (identity is null)
-            throw new RpcException(new Status(StatusCode.NotFound, $"User with username {request.Username} not found"));
-        
-        if (identity.Id != requestContext.UserId!)
-            throw new RpcException(new Status(StatusCode.NotFound, $"User with username {request.Username} not found"));
-        
-        return IdentityMappers.ToGrpc(identity);
     }
-
-    public override async Task<PantheonIdentity> GetUserByDeviceId(GetUserByDeviceIdRequest request, ServerCallContext context)
+    
+    private PantheonIdentity ProcessRequestInternally(global::Athena.SDK.Models.PantheonIdentity? identity)
     {
-        var identity = await athenaApi.GetUserByDeviceIdAsync(request.DeviceId, context.CancellationToken);
         if (identity is null)
-            throw new RpcException(new Status(StatusCode.NotFound, $"User with deviceId {request.DeviceId} not found"));
-        
+            throw new RpcException(new Status(StatusCode.NotFound, $"User  not found"));
+
+        if (identity.Id != requestContext.UserId!)
+            throw new RpcException(new Status(StatusCode.Unauthenticated,
+                $"You're not authorized to access this user"));
+
         return IdentityMappers.ToGrpc(identity);
     }
 }

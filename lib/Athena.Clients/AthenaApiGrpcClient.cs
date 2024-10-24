@@ -6,7 +6,7 @@ using Google.Protobuf;
 using Pantheon.Athena.Grpc;
 using PantheonIdentity = Athena.SDK.Models.PantheonIdentity;
 
-namespace Athena.Clients
+namespace Pantheon.Athena.Clients
 {
     public sealed class AthenaApiGrpcClient : IAthenaApi
     {
@@ -80,20 +80,33 @@ namespace Athena.Clients
 
             if (response == null) throw new NullReferenceException();
 
-            return Mappers.FromGrpc(response);        }
+            return Mappers.FromGrpc(response);
+        }
 
         public async Task<bool> VerifyPasswordAsync(Guid userId, string password,
             CancellationToken cancellationToken = default)
         {
             var response = await _client.VerifyPasswordAsync(new VerifyPasswordRequest
             {
-                 UserId = ByteString.CopyFrom(userId.ToByteArray()),
-                 Password =password
+                UserId = ByteString.CopyFrom(userId.ToByteArray()),
+                Password = password
             }, _requestContext.CreateMetadata(), _requestContext.CallDeadline, cancellationToken);
 
             if (response == null) throw new NullReferenceException();
 
             return response.IsValid;
+        }
+
+        public async Task<PantheonIdentity?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var response = await _client.GetUserByIdAsync(new GetUserByIdRequest()
+            {
+                UserId = ByteString.CopyFrom(userId.ToByteArray()),
+            }, _requestContext.CreateMetadata(), _requestContext.CallDeadline, cancellationToken);
+
+            if (response == null) throw new NullReferenceException();
+
+            return Mappers.FromGrpc(response);       
         }
     }
 }

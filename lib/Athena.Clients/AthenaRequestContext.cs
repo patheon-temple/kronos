@@ -1,7 +1,7 @@
 ﻿using System;
 using Grpc.Core;
 
-namespace Athena.Clients
+namespace Pantheon.Athena.Clients
 {
     public sealed class AthenaRequestContext
     {

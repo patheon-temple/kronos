@@ -19,5 +19,6 @@ namespace Athena.SDK
 
         Task<PantheonIdentity?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default);
         Task<bool> VerifyPasswordAsync(Guid userId, string password, CancellationToken cancellationToken = default);
+        Task<PantheonIdentity?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

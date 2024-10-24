@@ -78,14 +78,23 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
-        
+
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        
+
         var passwordHash = await db.UserAccounts.Where(x => x.UserId == userId).Select(x => x.PasswordHash)
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-        
+
         if (passwordHash is null) return false;
-        
+
         return passwordHash.Length > 0 && Passwords.VerifyHashedPassword(passwordHash, password);
+    }
+
+    public async Task<PantheonIdentity?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var data = await db.UserAccounts
+            .FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken: cancellationToken);
+
+        return data is null ? null : IdentityMappers.ToDomain(data);
     }
 }

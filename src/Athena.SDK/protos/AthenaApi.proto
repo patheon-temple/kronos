@@ -7,6 +7,7 @@ service AthenaApiGrpc {
   rpc CreateUserFromUsername(CreateUserFromUsernameRequest) returns (PantheonIdentity);
 
   rpc GetUserByDeviceId(GetUserByDeviceIdRequest) returns (PantheonIdentity);
+  rpc GetUserById(GetUserByIdRequest) returns (PantheonIdentity);
   rpc GetUserByUsername(GetUserByUsernameRequest) returns (PantheonIdentity);
 
   rpc DoesUsernameExist(DoesUsernameExistRequest) returns (DoesUsernameExistResponse);
@@ -23,6 +24,10 @@ message DoesUsernameExistResponse {
 
 message GetUserByDeviceIdRequest {
   string deviceId = 1;
+}
+
+message GetUserByIdRequest {
+  bytes userId = 1;
 }
 
 message GetUserByUsernameRequest {

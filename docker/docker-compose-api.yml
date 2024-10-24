@@ -1,12 +1,16 @@
 services:
   api:
+    depends_on:
+      postgres:
+        condition: service_healthy
     build:
-      dockerfile: ./Dockerfile.Kronos.WebApi
-      context: ../src/Kronos.WebAPI
+      dockerfile: ./Dockerfile
+      context: ../src/
     environment:
       - ASPNETCORE_URLS=https://+:7115;http://+:5108
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ConnectionStrings__Postge_Athena=User ID=root;Password=myPassword;Host=postgres;Port=5432;Database=pantheon;Pooling=true;MinPoolSize=0;MaxPoolSize=100;Connection Lifetime=0;
     ports:
       - "7115:7115"
       - "5108:5108"

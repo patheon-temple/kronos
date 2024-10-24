@@ -1,7 +1,7 @@
 ﻿using System;
 using Athena.SDK.Models;
 
-namespace Athena.Clients
+namespace Pantheon.Athena.Clients
 {
     public static class Mappers
     {
