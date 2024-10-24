@@ -1,4 +1,5 @@
-﻿using Kronos.WebAPI.Athena.Domain;
+﻿using Athena.SDK;
+using Kronos.WebAPI.Athena.Domain;
 using Kronos.WebAPI.Athena.SDK;
 using Microsoft.Extensions.Options;
 
@@ -26,6 +27,7 @@ public sealed class SuperuserHostedService(
         var password = credentials[1];
         if(string.IsNullOrWhiteSpace(username)) throw new NullReferenceException(nameof(username));
         if(string.IsNullOrWhiteSpace(password)) throw new NullReferenceException(nameof(password));
+        
         var exists = await athenaApi.DoesUsernameExistAsync(username, stoppingToken);
         if (exists)
         {

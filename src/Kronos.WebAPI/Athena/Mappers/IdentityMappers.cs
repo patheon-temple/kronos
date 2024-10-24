@@ -1,3 +1,4 @@
+using Athena.SDK.Models;
 using Kronos.WebAPI.Athena.Data;
 using Kronos.WebAPI.Athena.Domain;
 

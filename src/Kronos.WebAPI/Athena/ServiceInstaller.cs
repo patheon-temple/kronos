@@ -1,4 +1,5 @@
-﻿using Kronos.WebAPI.Athena.Domain;
+﻿using Athena.SDK;
+using Kronos.WebAPI.Athena.Domain;
 using Kronos.WebAPI.Athena.Infrastructure;
 using Kronos.WebAPI.Athena.SDK;
 using Microsoft.EntityFrameworkCore;

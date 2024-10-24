@@ -1,0 +1,17 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Pantheon.Athena.Grpc";
+
+service AthenaApi{
+  rpc CreateUserFromDeviceIdAsync(CreateUserFromDeviceIdRequest) returns (PantheonIdentity);
+}
+
+message CreateUserFromDeviceIdRequest{
+  string deviceId = 1;
+}
+
+message PantheonIdentity{
+  string id = 1;
+  string deviceId = 2;
+  bytes passwordHash = 3;
+}

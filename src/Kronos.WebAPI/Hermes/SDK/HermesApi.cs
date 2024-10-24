@@ -1,5 +1,5 @@
 using System.Security;
-using Kronos.WebAPI.Athena.SDK;
+using Athena.SDK;
 using Kronos.WebAPI.Hermes.Exceptions;
 using Kronos.WebAPI.Hermes.Services;
 

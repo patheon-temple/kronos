@@ -1,7 +1,7 @@
-using System.Security.Cryptography;
+using Athena.SDK;
+using Athena.SDK.Models;
 using Kronos.WebAPI.Athena.Crypto;
 using Kronos.WebAPI.Athena.Data;
-using Kronos.WebAPI.Athena.Domain;
 using Kronos.WebAPI.Athena.Infrastructure;
 using Kronos.WebAPI.Athena.Mappers;
 using Microsoft.EntityFrameworkCore;
@@ -69,13 +69,14 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var data = await db.UserAccounts
             .FirstOrDefaultAsync(x => x.Username != null && x.Username.Equals(username),
-            cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken);
 
         return data is null ? null : IdentityMappers.ToDomain(data);
     }
 
     public Task<bool> VerifyPasswordAsync(byte[] passwordHash, string password, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        ArgumentException.ThrowIfNullOrWhiteSpace(password);
+        return Task.FromResult(passwordHash.Length > 0 && Passwords.VerifyHashedPassword(passwordHash, password));
     }
 }

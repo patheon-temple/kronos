@@ -37,4 +37,8 @@
     <ItemGroup>
       <Folder Include="Kronos\WebApi\Interop\Responses\" />
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Athena.SDK\Athena.SDK.csproj" />
+    </ItemGroup>
 </Project>
