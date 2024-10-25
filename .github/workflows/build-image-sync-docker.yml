@@ -1,0 +1,37 @@
+name: Docker image (Kronos)
+
+on:
+  pull_request:
+    branches:
+      - master
+    types: [closed]
+  workflow_dispatch:
+
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Packages
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/RollDFour
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and push image
+        run: |
+          echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u martin-obert --password-stdin
+          docker build . --tag kronos:latest
+          docker push ghcr.io/patheon-temple/kronos:latest
+
+  instruct_docker:
+    name: Pull image and restart
+    needs: [push_to_registry]
+    uses: patheon-temple/kronos/.github/workflows/docker-stack-restart.yml@master
+    with:
+      do-upload-compose: false
+      restart-container: 'kronos'
+    secrets:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      GH_PAT: ${{ secrets.GH_PAT }}

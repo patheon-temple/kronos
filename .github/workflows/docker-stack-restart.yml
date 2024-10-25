@@ -1,0 +1,86 @@
+name: Docker stack restart
+
+on:
+  workflow_call:
+    inputs:
+      do-upload-compose:
+        type: boolean
+        required: true
+        default: false
+
+      restart-container:
+        type: string
+        description: 'Specify the container name to restart, otherwise all will be restarted'
+        required: false
+
+    secrets:
+      SSH_USER:
+        required: true
+      SSH_KEY:
+        required: true
+      SSH_HOST:
+        required: true
+      GH_PAT:
+        required: true
+
+  workflow_dispatch:
+    inputs:
+      restart-container:
+        type: string
+        description: 'Specify the container name to restart, otherwise all will be restarted'
+        required: false
+
+      do-upload-compose:
+        type: boolean
+        description: 'Reupload docker-compose-api.yml'
+        required: false
+        default: false
+
+jobs:
+  setup_ssh:
+    name: SSH and restart Docker
+    runs-on: ubuntu-latest
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      GH_PAT: ${{ secrets.GH_PAT }}
+      DOCKER_FILE_LOCAL_PATH: docker/docker-compose-api.yml
+      DOCKER_FILE_REMOTE_PATH: /root
+      GH_CR_USER: martin-obert
+    steps:
+      - name: Create SSH configuration
+
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+
+      - name: Test SSH connection
+        run: |
+          ssh staging "echo 'SSH Connection successful'"
+
+      - name: Checkout code
+        if: "${{ github.event.inputs.do_upload_compose == 'true' }}"
+        uses: actions/checkout@v4
+
+      - name: Reupload docker-compose-production.yml
+        if: "${{ github.event.inputs.do_upload_compose == 'true' }}"
+        run: |
+          scp $DOCKER_FILE_LOCAL_PATH staging:$DOCKER_FILE_REMOTE_PATH
+
+      - name: SSH Docker -> stop, pull, up recreate
+        run: |
+          ssh staging << EOF
+          # Setup docker to login into GitHub container registry using username and GH_PAT
+          echo $GH_PAT | docker login ghcr.io -u $GH_CR_USER --password-stdin && \
+          docker compose -f $DOCKER_FILE_REMOTE_PATH/docker-compose-production.yml -p main pull ${{ github.event.inputs.restart-container }} && \
+          docker compose -f $DOCKER_FILE_REMOTE_PATH/docker-compose-production.yml -p main up --force-recreate ${{ github.event.inputs.restart-container }} -d
+          EOF
