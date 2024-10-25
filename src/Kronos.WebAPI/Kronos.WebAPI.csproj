@@ -21,23 +21,32 @@
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0"/>
         <PackageReference Include="FluentValidation" Version="11.10.0" />
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
         <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="6.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Grpc.Swagger" Version="0.8.10" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.OpenApi" Version="1.6.22"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.8.1"/>
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.8.1"/>
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2"/>
+        <PackageReference Include="Google.Protobuf" Version="3.28.3" />
     </ItemGroup>
-
     <ItemGroup>
-      <Folder Include="Athena\Services\" />
-      <Folder Include="Athena\WebApi\Interop\Requests\" />
-      <Folder Include="Athena\WebApi\Interop\Responses\" />
-      <Folder Include="Kronos\WebApi\Interop\Responses\" />
+        <Protobuf Include="..\Athena.SDK\**\*.proto"
+                  GrpcServices="Server"
+                  OutputDir="gen"/>
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Athena.SDK\Athena.SDK.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="gen\" />
     </ItemGroup>
 </Project>

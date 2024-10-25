@@ -1,3 +1,11 @@
 @import 'primeicons/primeicons.css';
+@layer tailwind-base, primeVue, tailwind-utilities;
+@layer tailwind-base {
+  @tailwind base;
+}
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
 
 /*# sourceMappingURL=main.css.map */

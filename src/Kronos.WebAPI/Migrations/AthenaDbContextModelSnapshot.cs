@@ -32,7 +32,7 @@ namespace Kronos.WebAPI.Migrations
 
                     b.Property<byte[]>("Secret")
                         .IsRequired()
-                        .HasMaxLength(128)
+                        .HasMaxLength(256)
                         .HasColumnType("bytea")
                         .HasColumnName("secret");
 
@@ -54,6 +54,17 @@ namespace Kronos.WebAPI.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("device_id");
+
+                    b.Property<byte[]>("PasswordHash")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bytea")
+                        .HasColumnName("password_hash");
+
+                    b.Property<string>("Username")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("username");
 
                     b.HasKey("UserId")
                         .HasName("PK_user_account_id");

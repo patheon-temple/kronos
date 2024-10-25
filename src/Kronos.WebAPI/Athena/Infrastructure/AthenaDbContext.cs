@@ -6,7 +6,8 @@ namespace Kronos.WebAPI.Athena.Infrastructure;
 
 public sealed class AthenaDbContext(DbContextOptions<AthenaDbContext> options) : DbContext(options)
 {
-    public DbSet<UserAccountDataModel> PantheonIdentities { get; set; }
+    public DbSet<UserAccountDataModel> UserAccounts { get; set; }
+    public DbSet<ServiceAccountDataModel> ServiceAccounts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +31,17 @@ public sealed class AthenaDbContext(DbContextOptions<AthenaDbContext> options) :
             .HasMaxLength(128)
             .ValueGeneratedOnAdd();
         
+        modelBuilder.Entity<UserAccountDataModel>()
+            .Property(b => b.Username)
+            .HasColumnName("username")
+            .HasMaxLength(128)
+            .ValueGeneratedOnAdd();
+        
+        modelBuilder.Entity<UserAccountDataModel>()
+            .Property(b => b.PasswordHash)
+            .HasColumnName("password_hash")
+            .ValueGeneratedOnAdd();
+        
         
         modelBuilder.Entity<ServiceAccountDataModel>()
             .ToTable("service_accounts");
@@ -45,6 +57,6 @@ public sealed class AthenaDbContext(DbContextOptions<AthenaDbContext> options) :
         modelBuilder.Entity<ServiceAccountDataModel>()
             .Property(b => b.Secret)
             .HasColumnName("secret")
-            .HasMaxLength(128);
+            .HasMaxLength(256);
     }
 }

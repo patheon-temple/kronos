@@ -5,12 +5,15 @@ services:
       - 5432:5432
     volumes:
       - ./data/:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=myPassword
-      - POSTGRES_USER=root
-      - POSTGRES_DB=pantheon
+    env_file:
+      - .env
     networks:
       - kronos
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 networks:
   kronos:

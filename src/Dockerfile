@@ -6,8 +6,9 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy everything else and build the application
-COPY . .
-WORKDIR "/src/"
+COPY ./Kronos.WebAPI ./Kronos.WebAPI
+COPY ./Athena.SDK ./Athena.SDK
+WORKDIR "/src/Kronos.WebAPI"
 RUN dotnet build --configuration Release -o /app/build
 
 # Publish the app to a folder

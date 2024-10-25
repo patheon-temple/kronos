@@ -7,6 +7,6 @@ export class HermesApi extends ApiBase {
   }
 
   async authenticateWithDeviceIdAsync(deviceId: string): Promise<void> {
-    this.httpGet()
+    return new Promise(resolve => setTimeout(() => resolve(), 1000))
   }
 }

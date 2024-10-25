@@ -2,18 +2,19 @@
 import Panel from 'primevue/panel'
 import type { PantheonServiceName } from '@/services/kronos.api'
 import { onMounted, ref } from 'vue'
-import { useBackend } from '@/stores/backend'
+import { useKronos } from '@/stores/kronos'
+import { useApi } from '@/services/service.factory'
 
 const props = defineProps<{
   name: PantheonServiceName
 }>()
-const backend = useBackend()
+const kronos = useKronos()
 const isHealthy = ref<boolean>(false)
 const healthcheckIntervalHandle = ref<number | undefined>()
 const lastCheck = ref<Date | undefined>(undefined)
 
 onMounted(() => {
-  backend.getApi(props.name).then(api => {
+  useApi(kronos.api, props.name).then(api => {
     healthcheckIntervalHandle.value = setInterval(async () => {
       isHealthy.value = await api.healthcheck()
       lastCheck.value = new Date()
@@ -23,12 +24,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <Panel :header="name" toggleable>
+  <Panel :header="name" toggleable collapsed>
     <template #icons>
-      <i class="pi pi-heart-fill" v-if="isHealthy"></i>
-      <i class="pi pi-heart" v-else></i>
+      <i class="pi pi-heart-fill mx-1.5" v-if="isHealthy"></i>
+      <i class="pi pi-heart m-0.5" v-else></i>
     </template>
-    {{ lastCheck?.toISOString() }}
+    Last healthcheck: {{ lastCheck?.toISOString() }}
   </Panel>
 </template>
 
