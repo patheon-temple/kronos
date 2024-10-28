@@ -12,16 +12,23 @@ jobs:
   push_to_registry:
     name: Push Docker image to Packages
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src
     steps:
-      - uses: actions/checkout@v4
-      - name: Build and push image
-        run: |
-          echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u martin-obert --password-stdin
-          docker build . --tag kronos:latest
-          docker push ghcr.io/patheon-temple/kronos:latest
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src
+          push: true
+          tags: ghcr.io/patheon-temple/kronos:latest
 
   # instruct_docker:
     # name: Pull image and restart
