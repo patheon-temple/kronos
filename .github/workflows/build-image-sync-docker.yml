@@ -17,11 +17,19 @@ jobs:
         working-directory: src
     steps:
       - uses: actions/checkout@v4
-      - name: Build and push image
-        run: |
-          echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u martin-obert --password-stdin
-          docker build . --tag kronos:latest
-          docker push ghcr.io/patheon-temple/kronos:latest
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/patheon-temple/kronos:latest
 
   # instruct_docker:
     # name: Pull image and restart
