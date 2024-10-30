@@ -2,13 +2,15 @@ using Athena.SDK;
 using Athena.SDK.Models;
 using Kronos.WebAPI.Athena.Crypto;
 using Kronos.WebAPI.Athena.Data;
+using Kronos.WebAPI.Athena.Domain;
 using Kronos.WebAPI.Athena.Infrastructure;
 using Kronos.WebAPI.Athena.Mappers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Kronos.WebAPI.Athena.SDK;
 
-internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactory) : IAthenaApi
+internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactory, IOptionsSnapshot<AthenaConfiguration> optionsSnapshot) : IAthenaApi
 {
     public async Task<PantheonIdentity> CreateUserFromDeviceIdAsync(string deviceId,
         CancellationToken cancellationToken = default)
@@ -66,6 +68,12 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         CancellationToken cancellationToken = default)
     {
         username = username.ToLower();
+
+        if (username.Equals(optionsSnapshot.Value.SuperuserUsername)) return new PantheonIdentity
+        {
+            DeviceId = null,
+            Id = optionsSnapshot.Value.SuperuserId
+        };
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var data = await db.UserAccounts
             .FirstOrDefaultAsync(x => x.Username != null && x.Username.Equals(username),
@@ -79,6 +87,9 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
 
+        if (userId.Equals(optionsSnapshot.Value.SuperuserId))
+            return optionsSnapshot.Value.SuperuserPassword.Equals(password);
+        
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var passwordHash = await db.UserAccounts.Where(x => x.UserId == userId).Select(x => x.PasswordHash)
