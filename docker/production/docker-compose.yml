@@ -24,14 +24,10 @@ services:
     image: postgres:17-alpine
     ports:
       - "5432:5432"
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:?Database user is required}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Database password is required}
-      - POSTGRES_DB=${POSTGRES_DB:?Database name is required}
     volumes:
       - ./data/:/var/lib/postgresql/data
     env_file:
-      - .env
+      - ../.env
     networks:
       - kronos
     healthcheck:
@@ -44,16 +40,15 @@ services:
       postgres:
         condition: service_healthy
     image: ghcr.io/patheon-temple/kronos:latest
+    env_file:
+      - ../.env
     environment:
       - ASPNETCORE_URLS=http://+:5108
-      - AthenaConfiguration__Superuser=${AthenaConfiguration__Superuser}
       - ConnectionStrings__Postge_Athena=User ID=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Host=postgres;Port=5432;Database=${POSTGRES_DB};Pooling=true;MinPoolSize=0;MaxPoolSize=100;Connection Lifetime=0;
     ports:
       - "5108:5108"
     networks:
       - kronos
-#    volumes:
-#      - ./certbot/conf/live/pantheon.obert.cz:/https/  # Mount the certificate volume
 
 networks:
   kronos:
