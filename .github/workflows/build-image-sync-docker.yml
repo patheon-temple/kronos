@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - master
-    types: [closed]
+    types: [ closed ]
   workflow_dispatch:
 
 
@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -30,15 +30,14 @@ jobs:
           push: true
           tags: ghcr.io/patheon-temple/kronos:latest
 
-  # instruct_docker:
-    # name: Pull image and restart
-    # needs: [push_to_registry]
-    # uses: patheon-temple/kronos/.github/workflows/docker-stack-restart.yml@master
-    # with:
-      # do-upload-compose: false
-      # restart-container: 'kronos'
-    # secrets:
-      # SSH_USER: ${{ secrets.SSH_USER }}
-      # SSH_KEY: ${{ secrets.SSH_KEY }}
-      # SSH_HOST: ${{ secrets.SSH_HOST }}
-      # GH_PAT: ${{ secrets.GH_PAT }}
+  instruct_docker:
+    name: Pull image and restart
+    needs: [ push_to_registry ]
+    uses: .github/workflows/docker-stack-restart.yml@master
+    with:
+      do-upload-compose: false
+    secrets:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      GH_PAT: ${{ secrets.GH_PAT }}
