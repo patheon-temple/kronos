@@ -1,5 +1,9 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+LABEL org.opencontainers.image.source="https://github.com/patheon-temple/kronos"
+LABEL org.opencontainers.image.description="Kronos API"
+LABEL org.opencontainers.image.licenses="MIT"
 USER $APP_UID
+
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build

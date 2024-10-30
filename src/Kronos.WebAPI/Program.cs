@@ -1,5 +1,6 @@
 using System.Text;
 using FluentValidation;
+using Kronos.WebAPI;
 using Kronos.WebAPI.Athena;
 using Kronos.WebAPI.Hermes.SDK;
 using Kronos.WebAPI.Hermes.WebApi;
@@ -17,6 +18,8 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     var services = builder.Services;
+    services.AddHostedService<AutoEfMigrationsHostedService>();
+
     services.AddGrpcSwagger();
     services.AddValidatorsFromAssemblyContaining<Program>();
     services.AddFluentValidationRulesToSwagger();

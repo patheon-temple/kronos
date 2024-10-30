@@ -1,0 +1,21 @@
+services:
+  api:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: ghcr.io/patheon-temple/kronos:latest
+    environment:
+      - ASPNETCORE_URLS=http://+:5108
+#      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/cert.pem
+      - ConnectionStrings__Postge_Athena=User ID=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Host=postgres;Port=5432;Database=${POSTGRES_DB};Pooling=true;MinPoolSize=0;MaxPoolSize=100;Connection Lifetime=0;
+    ports:
+      - "7115:7115"
+      - "5108:5108"
+    networks:
+      - kronos
+#    volumes:
+#      - ./certbot/conf/live/pantheon.obert.cz:/https/  # Mount the certificate volume
+networks:
+  kronos:
+      
+      
