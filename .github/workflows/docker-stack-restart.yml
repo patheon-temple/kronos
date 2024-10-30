@@ -8,11 +8,6 @@ on:
         required: true
         default: false
 
-      restart-container:
-        type: string
-        description: 'Specify the container name to restart, otherwise all will be restarted'
-        required: false
-
     secrets:
       SSH_USER:
         required: true
@@ -25,11 +20,6 @@ on:
 
   workflow_dispatch:
     inputs:
-      restart-container:
-        type: string
-        description: 'Specify the container name to restart, otherwise all will be restarted'
-        required: false
-
       do-upload-compose:
         type: boolean
         description: 'Reupload docker-compose-api.yml'
