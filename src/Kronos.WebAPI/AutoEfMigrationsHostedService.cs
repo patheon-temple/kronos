@@ -13,8 +13,9 @@ public class AutoEfMigrationsHostedService(IServiceProvider serviceProvider) : B
         var services = scope.ServiceProvider;
         try
         {
-            var context = services.GetRequiredService<AthenaDbContext>();
-            await context.Database.MigrateAsync(stoppingToken);
+            var context = services.GetRequiredService<IDbContextFactory<AthenaDbContext>>();
+            var dbContext = await context.CreateDbContextAsync(stoppingToken);
+            await dbContext.Database.MigrateAsync(stoppingToken);
         }
         catch (Exception ex)
         {
