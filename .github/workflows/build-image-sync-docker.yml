@@ -33,7 +33,7 @@ jobs:
   instruct_docker:
     name: Pull image and restart
     needs: [ push_to_registry ]
-    uses: ./.github/workflows/docker-stack-restart.yml@master
+    uses: ./.github/workflows/docker-stack-restart.yml
     with:
       do-upload-compose: false
     secrets:
