@@ -1,9 +1,6 @@
-﻿using System.Text;
-using FluentValidation;
+﻿using System.Security;
 using Kronos.WebAPI.Athena.Crypto;
-using Kronos.WebAPI.Athena.SDK;
 using Kronos.WebAPI.Hermes.SDK;
-using Kronos.WebAPI.Hermes.Services;
 using Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
 using Kronos.WebAPI.Hermes.WebApi.Interop.Responses;
 using Microsoft.AspNetCore.Mvc;
@@ -45,32 +42,41 @@ public static class Endpoints
                 return Results.ValidationProblem(validation.ToDictionary());
             }
 
-            switch (request.CredentialsType)
+            return request.CredentialsType switch
             {
-                case CredentialsType.DeviceId:
+                CredentialsType.DeviceId => await DeviceIdTokenSet(request, hermesApi, cancellationToken),
+                CredentialsType.Password => await UserCredentialsTokenSet(request, hermesApi, cancellationToken),
+                CredentialsType.Unknown => Results.Problem($"Unknown credentials type: {request.CredentialsType}",
+                    statusCode: StatusCodes.Status501NotImplemented),
+                _ => Results.Problem($"Unknown credentials type: {request.CredentialsType}",
+                    statusCode: StatusCodes.Status501NotImplemented)
+            };
+        }
+
+        private static async Task<IResult> UserCredentialsTokenSet(AuthenticationPostRequest request, IHermesApi hermesApi, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var tokenSet = await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
+                    request.Password!, cancellationToken);
+                return Results.Ok(new AuthenticationSuccessfulResponse
                 {
-                    var tokenSet = await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!, cancellationToken);
-                    return Results.Ok(new AuthenticationSuccessfulResponse
-                    {
-                        AccessToken = tokenSet.AccessToken
-                    });
-                }
-                case CredentialsType.Password:
-                {
-                    var tokenSet = await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
-                        request.Password!, cancellationToken);
-                    return Results.Ok(new AuthenticationSuccessfulResponse
-                    {
-                        AccessToken = tokenSet.AccessToken
-                    });
-                }
-                case CredentialsType.Unknown:
-                default:
-                {
-                    return Results.Problem($"Unknown credentials type: {request.CredentialsType}",
-                        statusCode: StatusCodes.Status501NotImplemented);
-                }
+                    AccessToken = tokenSet.AccessToken
+                });
             }
+            catch (SecurityException e)
+            {
+                return Results.Unauthorized();
+            }
+        }
+
+        private static async Task<IResult> DeviceIdTokenSet(AuthenticationPostRequest request, IHermesApi hermesApi, CancellationToken cancellationToken = default)
+        {
+            var tokenSet = await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!, cancellationToken);
+            return Results.Ok(new AuthenticationSuccessfulResponse
+            {
+                AccessToken = tokenSet.AccessToken
+            });
         }
     }
 }

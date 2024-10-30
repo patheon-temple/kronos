@@ -1,0 +1,60 @@
+services:
+  nginx:
+    image: nginx:perl
+    depends_on:
+      - api
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - kronos
+
+  certbot:
+    image: certbot/certbot:v2.11.0
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  postgres:
+    image: postgres:17-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:?Database user is required}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Database password is required}
+      - POSTGRES_DB=${POSTGRES_DB:?Database name is required}
+    volumes:
+      - ./data/:/var/lib/postgresql/data
+    env_file:
+      - .env
+    networks:
+      - kronos
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+  api:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: ghcr.io/patheon-temple/kronos:latest
+    environment:
+      - ASPNETCORE_URLS=http://+:5108
+      - AthenaConfiguration__Superuser=${AthenaConfiguration__Superuser}
+      - ConnectionStrings__Postge_Athena=User ID=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Host=postgres;Port=5432;Database=${POSTGRES_DB};Pooling=true;MinPoolSize=0;MaxPoolSize=100;Connection Lifetime=0;
+    ports:
+      - "5108:5108"
+    networks:
+      - kronos
+#    volumes:
+#      - ./certbot/conf/live/pantheon.obert.cz:/https/  # Mount the certificate volume
+
+networks:
+  kronos:
+
