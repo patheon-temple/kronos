@@ -8,11 +8,6 @@ on:
         required: true
         default: false
 
-      restart-container:
-        type: string
-        description: 'Specify the container name to restart, otherwise all will be restarted'
-        required: false
-
     secrets:
       SSH_USER:
         required: true
@@ -25,11 +20,6 @@ on:
 
   workflow_dispatch:
     inputs:
-      restart-container:
-        type: string
-        description: 'Specify the container name to restart, otherwise all will be restarted'
-        required: false
-
       do-upload-compose:
         type: boolean
         description: 'Reupload docker-compose-api.yml'
@@ -45,9 +35,9 @@ jobs:
       SSH_KEY: ${{ secrets.SSH_KEY }}
       SSH_HOST: ${{ secrets.SSH_HOST }}
       GH_PAT: ${{ secrets.GH_PAT }}
-      DOCKER_FILE_LOCAL_PATH: docker/docker-compose-api.yml
-      DOCKER_FILE_REMOTE_PATH: /root
-      GH_CR_USER: martin-obert
+      DOCKER_FILE_LOCAL_PATH: docker/docker-compose.yml
+      DOCKER_FILE_REMOTE_PATH: /github-actions
+      GH_CR_USER: ${{ secrets.GH_CR_USER }}
     steps:
       - name: Create SSH configuration
 
@@ -79,8 +69,6 @@ jobs:
       - name: SSH Docker -> stop, pull, up recreate
         run: |
           ssh staging << EOF
-          # Setup docker to login into GitHub container registry using username and GH_PAT
-          echo $GH_PAT | docker login ghcr.io -u $GH_CR_USER --password-stdin && \
-          docker compose -f $DOCKER_FILE_REMOTE_PATH/docker-compose-production.yml -p main pull ${{ github.event.inputs.restart-container }} && \
-          docker compose -f $DOCKER_FILE_REMOTE_PATH/docker-compose-production.yml -p main up --force-recreate ${{ github.event.inputs.restart-container }} -d
+          cd /github-actions
+          sh restart-services.sh
           EOF
