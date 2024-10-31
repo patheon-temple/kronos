@@ -1,4 +1,5 @@
 ﻿syntax = "proto3";
+import "AthenaCommon.proto";
 
 option csharp_namespace = "Pantheon.Athena.Grpc";
 
@@ -50,9 +51,4 @@ message VerifyPasswordRequest {
 
 message VerifyPasswordResponse {
   bool isValid = 1;
-}
-
-message PantheonIdentity {
-  bytes id = 1;
-  string deviceId = 2;
 }

@@ -13,7 +13,7 @@ public static class IdentityMappers
         PasswordHash = data.PasswordHash
     };
 
-    public static Pantheon.Athena.Grpc.PantheonIdentity ToGrpc(PantheonIdentity identity) =>
+    public static Pantheon.Athena.Grpc.Common.PantheonIdentity ToGrpc(PantheonIdentity identity) =>
         new()
         {
             Id = ByteString.CopyFrom(identity.Id.ToByteArray()),

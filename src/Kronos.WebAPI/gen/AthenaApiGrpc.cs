@@ -48,7 +48,7 @@ namespace Pantheon.Athena.Grpc {
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest> __Marshaller_CreateUserFromDeviceIdRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Marshaller<global::Pantheon.Athena.Grpc.PantheonIdentity> __Marshaller_PantheonIdentity = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pantheon.Athena.Grpc.PantheonIdentity.Parser));
+    static readonly grpc::Marshaller<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> __Marshaller_PantheonIdentity = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pantheon.Athena.Grpc.Common.PantheonIdentity.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest> __Marshaller_CreateUserFromUsernameRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
@@ -67,7 +67,7 @@ namespace Pantheon.Athena.Grpc {
     static readonly grpc::Marshaller<global::Pantheon.Athena.Grpc.VerifyPasswordResponse> __Marshaller_VerifyPasswordResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pantheon.Athena.Grpc.VerifyPasswordResponse.Parser));
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Method<global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest, global::Pantheon.Athena.Grpc.PantheonIdentity> __Method_CreateUserFromDeviceId = new grpc::Method<global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(
+    static readonly grpc::Method<global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity> __Method_CreateUserFromDeviceId = new grpc::Method<global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(
         grpc::MethodType.Unary,
         __ServiceName,
         "CreateUserFromDeviceId",
@@ -75,7 +75,7 @@ namespace Pantheon.Athena.Grpc {
         __Marshaller_PantheonIdentity);
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Method<global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest, global::Pantheon.Athena.Grpc.PantheonIdentity> __Method_CreateUserFromUsername = new grpc::Method<global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(
+    static readonly grpc::Method<global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity> __Method_CreateUserFromUsername = new grpc::Method<global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(
         grpc::MethodType.Unary,
         __ServiceName,
         "CreateUserFromUsername",
@@ -83,7 +83,7 @@ namespace Pantheon.Athena.Grpc {
         __Marshaller_PantheonIdentity);
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Method<global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest, global::Pantheon.Athena.Grpc.PantheonIdentity> __Method_GetUserByDeviceId = new grpc::Method<global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(
+    static readonly grpc::Method<global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity> __Method_GetUserByDeviceId = new grpc::Method<global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(
         grpc::MethodType.Unary,
         __ServiceName,
         "GetUserByDeviceId",
@@ -91,7 +91,7 @@ namespace Pantheon.Athena.Grpc {
         __Marshaller_PantheonIdentity);
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Method<global::Pantheon.Athena.Grpc.GetUserByIdRequest, global::Pantheon.Athena.Grpc.PantheonIdentity> __Method_GetUserById = new grpc::Method<global::Pantheon.Athena.Grpc.GetUserByIdRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(
+    static readonly grpc::Method<global::Pantheon.Athena.Grpc.GetUserByIdRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity> __Method_GetUserById = new grpc::Method<global::Pantheon.Athena.Grpc.GetUserByIdRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(
         grpc::MethodType.Unary,
         __ServiceName,
         "GetUserById",
@@ -99,7 +99,7 @@ namespace Pantheon.Athena.Grpc {
         __Marshaller_PantheonIdentity);
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Method<global::Pantheon.Athena.Grpc.GetUserByUsernameRequest, global::Pantheon.Athena.Grpc.PantheonIdentity> __Method_GetUserByUsername = new grpc::Method<global::Pantheon.Athena.Grpc.GetUserByUsernameRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(
+    static readonly grpc::Method<global::Pantheon.Athena.Grpc.GetUserByUsernameRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity> __Method_GetUserByUsername = new grpc::Method<global::Pantheon.Athena.Grpc.GetUserByUsernameRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(
         grpc::MethodType.Unary,
         __ServiceName,
         "GetUserByUsername",
@@ -133,31 +133,31 @@ namespace Pantheon.Athena.Grpc {
     public abstract partial class AthenaApiGrpcBase
     {
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.PantheonIdentity> CreateUserFromDeviceId(global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> CreateUserFromDeviceId(global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.PantheonIdentity> CreateUserFromUsername(global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> CreateUserFromUsername(global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.PantheonIdentity> GetUserByDeviceId(global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> GetUserByDeviceId(global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.PantheonIdentity> GetUserById(global::Pantheon.Athena.Grpc.GetUserByIdRequest request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> GetUserById(global::Pantheon.Athena.Grpc.GetUserByIdRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.PantheonIdentity> GetUserByUsername(global::Pantheon.Athena.Grpc.GetUserByUsernameRequest request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> GetUserByUsername(global::Pantheon.Athena.Grpc.GetUserByUsernameRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -198,11 +198,11 @@ namespace Pantheon.Athena.Grpc {
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     public static void BindService(grpc::ServiceBinderBase serviceBinder, AthenaApiGrpcBase serviceImpl)
     {
-      serviceBinder.AddMethod(__Method_CreateUserFromDeviceId, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(serviceImpl.CreateUserFromDeviceId));
-      serviceBinder.AddMethod(__Method_CreateUserFromUsername, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(serviceImpl.CreateUserFromUsername));
-      serviceBinder.AddMethod(__Method_GetUserByDeviceId, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(serviceImpl.GetUserByDeviceId));
-      serviceBinder.AddMethod(__Method_GetUserById, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.GetUserByIdRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(serviceImpl.GetUserById));
-      serviceBinder.AddMethod(__Method_GetUserByUsername, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.GetUserByUsernameRequest, global::Pantheon.Athena.Grpc.PantheonIdentity>(serviceImpl.GetUserByUsername));
+      serviceBinder.AddMethod(__Method_CreateUserFromDeviceId, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(serviceImpl.CreateUserFromDeviceId));
+      serviceBinder.AddMethod(__Method_CreateUserFromUsername, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(serviceImpl.CreateUserFromUsername));
+      serviceBinder.AddMethod(__Method_GetUserByDeviceId, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(serviceImpl.GetUserByDeviceId));
+      serviceBinder.AddMethod(__Method_GetUserById, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.GetUserByIdRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(serviceImpl.GetUserById));
+      serviceBinder.AddMethod(__Method_GetUserByUsername, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.GetUserByUsernameRequest, global::Pantheon.Athena.Grpc.Common.PantheonIdentity>(serviceImpl.GetUserByUsername));
       serviceBinder.AddMethod(__Method_DoesUsernameExist, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.DoesUsernameExistRequest, global::Pantheon.Athena.Grpc.DoesUsernameExistResponse>(serviceImpl.DoesUsernameExist));
       serviceBinder.AddMethod(__Method_VerifyPassword, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pantheon.Athena.Grpc.VerifyPasswordRequest, global::Pantheon.Athena.Grpc.VerifyPasswordResponse>(serviceImpl.VerifyPassword));
     }

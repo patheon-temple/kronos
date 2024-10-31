@@ -3,6 +3,7 @@ using Grpc.Core;
 using Kronos.WebAPI.Athena.Mappers;
 using Kronos.WebAPI.Hermes.SDK;
 using Pantheon.Athena.Grpc;
+using Pantheon.Athena.Grpc.Common;
 
 namespace Kronos.WebAPI.Athena.WebApi.GrpcServices;
 

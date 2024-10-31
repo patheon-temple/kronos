@@ -28,6 +28,7 @@
                   GrpcServices="Client" 
                   OutputDir="gen"/>
         <None Include="docs\Readme.md" Pack="true" PackagePath="\"/>
+        <Protobuf Remove="..\..\src\Athena.SDK\protos\**" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Google.Protobuf" Version="3.28.3" />

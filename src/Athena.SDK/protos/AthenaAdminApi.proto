@@ -1,0 +1,14 @@
+﻿syntax = "proto3";
+import "AthenaCommon.proto";
+
+option csharp_namespace = "Pantheon.Athena.Grpc.Admin";
+
+service AthenaAdminApiGrpc {
+  rpc CreateUser(CreateUserRequest) returns (PantheonIdentity);
+}
+
+message CreateUserRequest {
+  string Username = 1;
+  string Password = 2;
+  string DeviceId = 3;
+}

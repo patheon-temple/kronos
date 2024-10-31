@@ -24,32 +24,31 @@ namespace Pantheon.Athena.Grpc {
     static AthenaApiReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg9BdGhlbmFBcGkucHJvdG8iLAoYRG9lc1VzZXJuYW1lRXhpc3RSZXF1ZXN0",
-            "EhAKCHVzZXJuYW1lGAEgASgJIi4KGURvZXNVc2VybmFtZUV4aXN0UmVzcG9u",
-            "c2USEQoJZG9lc0V4aXN0GAEgASgIIiwKGEdldFVzZXJCeURldmljZUlkUmVx",
-            "dWVzdBIQCghkZXZpY2VJZBgBIAEoCSIkChJHZXRVc2VyQnlJZFJlcXVlc3QS",
-            "DgoGdXNlcklkGAEgASgMIiwKGEdldFVzZXJCeVVzZXJuYW1lUmVxdWVzdBIQ",
-            "Cgh1c2VybmFtZRgBIAEoCSIxCh1DcmVhdGVVc2VyRnJvbURldmljZUlkUmVx",
-            "dWVzdBIQCghkZXZpY2VJZBgBIAEoCSJDCh1DcmVhdGVVc2VyRnJvbVVzZXJu",
-            "YW1lUmVxdWVzdBIQCgh1c2VybmFtZRgBIAEoCRIQCghwYXNzd29yZBgCIAEo",
-            "CSI5ChVWZXJpZnlQYXNzd29yZFJlcXVlc3QSDgoGdXNlcklkGAEgASgMEhAK",
-            "CHBhc3N3b3JkGAIgASgJIikKFlZlcmlmeVBhc3N3b3JkUmVzcG9uc2USDwoH",
-            "aXNWYWxpZBgBIAEoCCIwChBQYW50aGVvbklkZW50aXR5EgoKAmlkGAEgASgM",
-            "EhAKCGRldmljZUlkGAIgASgJMvUDCg1BdGhlbmFBcGlHcnBjEksKFkNyZWF0",
-            "ZVVzZXJGcm9tRGV2aWNlSWQSHi5DcmVhdGVVc2VyRnJvbURldmljZUlkUmVx",
-            "dWVzdBoRLlBhbnRoZW9uSWRlbnRpdHkSSwoWQ3JlYXRlVXNlckZyb21Vc2Vy",
-            "bmFtZRIeLkNyZWF0ZVVzZXJGcm9tVXNlcm5hbWVSZXF1ZXN0GhEuUGFudGhl",
-            "b25JZGVudGl0eRJBChFHZXRVc2VyQnlEZXZpY2VJZBIZLkdldFVzZXJCeURl",
-            "dmljZUlkUmVxdWVzdBoRLlBhbnRoZW9uSWRlbnRpdHkSNQoLR2V0VXNlckJ5",
-            "SWQSEy5HZXRVc2VyQnlJZFJlcXVlc3QaES5QYW50aGVvbklkZW50aXR5EkEK",
-            "EUdldFVzZXJCeVVzZXJuYW1lEhkuR2V0VXNlckJ5VXNlcm5hbWVSZXF1ZXN0",
-            "GhEuUGFudGhlb25JZGVudGl0eRJKChFEb2VzVXNlcm5hbWVFeGlzdBIZLkRv",
-            "ZXNVc2VybmFtZUV4aXN0UmVxdWVzdBoaLkRvZXNVc2VybmFtZUV4aXN0UmVz",
-            "cG9uc2USQQoOVmVyaWZ5UGFzc3dvcmQSFi5WZXJpZnlQYXNzd29yZFJlcXVl",
-            "c3QaFy5WZXJpZnlQYXNzd29yZFJlc3BvbnNlQheqAhRQYW50aGVvbi5BdGhl",
-            "bmEuR3JwY2IGcHJvdG8z"));
+            "Cg9BdGhlbmFBcGkucHJvdG8aEkF0aGVuYUNvbW1vbi5wcm90byIsChhEb2Vz",
+            "VXNlcm5hbWVFeGlzdFJlcXVlc3QSEAoIdXNlcm5hbWUYASABKAkiLgoZRG9l",
+            "c1VzZXJuYW1lRXhpc3RSZXNwb25zZRIRCglkb2VzRXhpc3QYASABKAgiLAoY",
+            "R2V0VXNlckJ5RGV2aWNlSWRSZXF1ZXN0EhAKCGRldmljZUlkGAEgASgJIiQK",
+            "EkdldFVzZXJCeUlkUmVxdWVzdBIOCgZ1c2VySWQYASABKAwiLAoYR2V0VXNl",
+            "ckJ5VXNlcm5hbWVSZXF1ZXN0EhAKCHVzZXJuYW1lGAEgASgJIjEKHUNyZWF0",
+            "ZVVzZXJGcm9tRGV2aWNlSWRSZXF1ZXN0EhAKCGRldmljZUlkGAEgASgJIkMK",
+            "HUNyZWF0ZVVzZXJGcm9tVXNlcm5hbWVSZXF1ZXN0EhAKCHVzZXJuYW1lGAEg",
+            "ASgJEhAKCHBhc3N3b3JkGAIgASgJIjkKFVZlcmlmeVBhc3N3b3JkUmVxdWVz",
+            "dBIOCgZ1c2VySWQYASABKAwSEAoIcGFzc3dvcmQYAiABKAkiKQoWVmVyaWZ5",
+            "UGFzc3dvcmRSZXNwb25zZRIPCgdpc1ZhbGlkGAEgASgIMvUDCg1BdGhlbmFB",
+            "cGlHcnBjEksKFkNyZWF0ZVVzZXJGcm9tRGV2aWNlSWQSHi5DcmVhdGVVc2Vy",
+            "RnJvbURldmljZUlkUmVxdWVzdBoRLlBhbnRoZW9uSWRlbnRpdHkSSwoWQ3Jl",
+            "YXRlVXNlckZyb21Vc2VybmFtZRIeLkNyZWF0ZVVzZXJGcm9tVXNlcm5hbWVS",
+            "ZXF1ZXN0GhEuUGFudGhlb25JZGVudGl0eRJBChFHZXRVc2VyQnlEZXZpY2VJ",
+            "ZBIZLkdldFVzZXJCeURldmljZUlkUmVxdWVzdBoRLlBhbnRoZW9uSWRlbnRp",
+            "dHkSNQoLR2V0VXNlckJ5SWQSEy5HZXRVc2VyQnlJZFJlcXVlc3QaES5QYW50",
+            "aGVvbklkZW50aXR5EkEKEUdldFVzZXJCeVVzZXJuYW1lEhkuR2V0VXNlckJ5",
+            "VXNlcm5hbWVSZXF1ZXN0GhEuUGFudGhlb25JZGVudGl0eRJKChFEb2VzVXNl",
+            "cm5hbWVFeGlzdBIZLkRvZXNVc2VybmFtZUV4aXN0UmVxdWVzdBoaLkRvZXNV",
+            "c2VybmFtZUV4aXN0UmVzcG9uc2USQQoOVmVyaWZ5UGFzc3dvcmQSFi5WZXJp",
+            "ZnlQYXNzd29yZFJlcXVlc3QaFy5WZXJpZnlQYXNzd29yZFJlc3BvbnNlQheq",
+            "AhRQYW50aGVvbi5BdGhlbmEuR3JwY2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { },
+          new pbr::FileDescriptor[] { global::Pantheon.Athena.Grpc.Common.AthenaCommonReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.DoesUsernameExistRequest), global::Pantheon.Athena.Grpc.DoesUsernameExistRequest.Parser, new[]{ "Username" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.DoesUsernameExistResponse), global::Pantheon.Athena.Grpc.DoesUsernameExistResponse.Parser, new[]{ "DoesExist" }, null, null, null, null),
@@ -59,8 +58,7 @@ namespace Pantheon.Athena.Grpc {
             new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest), global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest.Parser, new[]{ "DeviceId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest), global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest.Parser, new[]{ "Username", "Password" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.VerifyPasswordRequest), global::Pantheon.Athena.Grpc.VerifyPasswordRequest.Parser, new[]{ "UserId", "Password" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.VerifyPasswordResponse), global::Pantheon.Athena.Grpc.VerifyPasswordResponse.Parser, new[]{ "IsValid" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.PantheonIdentity), global::Pantheon.Athena.Grpc.PantheonIdentity.Parser, new[]{ "Id", "DeviceId" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.VerifyPasswordResponse), global::Pantheon.Athena.Grpc.VerifyPasswordResponse.Parser, new[]{ "IsValid" }, null, null, null, null)
           }));
     }
     #endregion
@@ -1914,241 +1912,6 @@ namespace Pantheon.Athena.Grpc {
             break;
           case 8: {
             IsValid = input.ReadBool();
-            break;
-          }
-        }
-      }
-    }
-    #endif
-
-  }
-
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class PantheonIdentity : pb::IMessage<PantheonIdentity>
-  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
-  #endif
-  {
-    private static readonly pb::MessageParser<PantheonIdentity> _parser = new pb::MessageParser<PantheonIdentity>(() => new PantheonIdentity());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<PantheonIdentity> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Pantheon.Athena.Grpc.AthenaApiReflection.Descriptor.MessageTypes[9]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public PantheonIdentity() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public PantheonIdentity(PantheonIdentity other) : this() {
-      id_ = other.id_;
-      deviceId_ = other.deviceId_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public PantheonIdentity Clone() {
-      return new PantheonIdentity(this);
-    }
-
-    /// <summary>Field number for the "id" field.</summary>
-    public const int IdFieldNumber = 1;
-    private pb::ByteString id_ = pb::ByteString.Empty;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pb::ByteString Id {
-      get { return id_; }
-      set {
-        id_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
-    /// <summary>Field number for the "deviceId" field.</summary>
-    public const int DeviceIdFieldNumber = 2;
-    private string deviceId_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public string DeviceId {
-      get { return deviceId_; }
-      set {
-        deviceId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as PantheonIdentity);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(PantheonIdentity other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (Id != other.Id) return false;
-      if (DeviceId != other.DeviceId) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (Id.Length != 0) hash ^= Id.GetHashCode();
-      if (DeviceId.Length != 0) hash ^= DeviceId.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (Id.Length != 0) {
-        output.WriteRawTag(10);
-        output.WriteBytes(Id);
-      }
-      if (DeviceId.Length != 0) {
-        output.WriteRawTag(18);
-        output.WriteString(DeviceId);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (Id.Length != 0) {
-        output.WriteRawTag(10);
-        output.WriteBytes(Id);
-      }
-      if (DeviceId.Length != 0) {
-        output.WriteRawTag(18);
-        output.WriteString(DeviceId);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (Id.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Id);
-      }
-      if (DeviceId.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(DeviceId);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(PantheonIdentity other) {
-      if (other == null) {
-        return;
-      }
-      if (other.Id.Length != 0) {
-        Id = other.Id;
-      }
-      if (other.DeviceId.Length != 0) {
-        DeviceId = other.DeviceId;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            Id = input.ReadBytes();
-            break;
-          }
-          case 18: {
-            DeviceId = input.ReadString();
-            break;
-          }
-        }
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 10: {
-            Id = input.ReadBytes();
-            break;
-          }
-          case 18: {
-            DeviceId = input.ReadString();
             break;
           }
         }
