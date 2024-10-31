@@ -1,5 +1,6 @@
 using Athena.SDK;
 using Athena.SDK.Models;
+using FluentValidation;
 using Kronos.WebAPI.Athena.Crypto;
 using Kronos.WebAPI.Athena.Data;
 using Kronos.WebAPI.Athena.Domain;
@@ -10,7 +11,54 @@ using Microsoft.Extensions.Options;
 
 namespace Kronos.WebAPI.Athena.SDK;
 
-internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactory, IOptionsSnapshot<AthenaConfiguration> optionsSnapshot) : IAthenaApi
+internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextFactory, IAthenaApi athenaApi)
+    : IAthenaAdminApi
+{
+    public async Task<PantheonIdentity> CreateUserAsync(string? deviceId, string? username, string? password,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(deviceId) && string.IsNullOrWhiteSpace(username))
+            throw new ArgumentNullException(nameof(deviceId),
+                $"{nameof(deviceId)} and {nameof(username)} cannot be null or empty.");
+
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            await IsUsernameAndPasswordValidOrThrowAsync(username, password, cancellationToken);
+        }
+
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var identity = new UserAccountDataModel
+        {
+            DeviceId = deviceId,
+            PasswordHash = string.IsNullOrWhiteSpace(password) ? null : Passwords.HashPassword(password),
+            Username = username?.ToLower()
+        };
+        db.UserAccounts.Add(identity);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return IdentityMappers.ToDomain(identity);
+    }
+
+    private async Task IsUsernameAndPasswordValidOrThrowAsync(string username, string? password,
+        CancellationToken cancellationToken)
+    {
+        if (await athenaApi.DoesUsernameExistAsync(username, cancellationToken))
+            throw new ValidationException("Username already exists.");
+
+        var passwordValidator = Passwords.CreateValidator();
+        var validationResult = await passwordValidator.ValidateAsync(new UserCredentialsValidationParams
+        {
+            Username = username,
+            Password = password
+        }, cancellationToken);
+
+        if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
+    }
+}
+
+internal sealed class AthenaApi(
+    IDbContextFactory<AthenaDbContext> contextFactory,
+    IOptionsSnapshot<AthenaConfiguration> optionsSnapshot) : IAthenaApi
 {
     public async Task<PantheonIdentity> CreateUserFromDeviceIdAsync(string deviceId,
         CancellationToken cancellationToken = default)
@@ -51,6 +99,9 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         CancellationToken cancellationToken = default)
     {
         username = username.ToLower();
+
+        await IsUsernameAndPasswordValidOrThrowAsync(username, password, cancellationToken);
+
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var entity = new UserAccountDataModel
         {
@@ -64,16 +115,32 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
         return IdentityMappers.ToDomain(entity);
     }
 
+    private async Task IsUsernameAndPasswordValidOrThrowAsync(string username, string password, CancellationToken cancellationToken)
+    {
+        if (await DoesUsernameExistAsync(username, cancellationToken))
+            throw new ValidationException("Username already exists.");
+
+        var passwordValidator = Passwords.CreateValidator();
+        var validationResult = await passwordValidator.ValidateAsync(new UserCredentialsValidationParams
+        {
+            Username = username,
+            Password = password
+        }, cancellationToken);
+
+        if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
+    }
+
     public async Task<PantheonIdentity?> GetUserByUsernameAsync(string username,
         CancellationToken cancellationToken = default)
     {
         username = username.ToLower();
 
-        if (username.Equals(optionsSnapshot.Value.SuperuserUsername)) return new PantheonIdentity
-        {
-            DeviceId = null,
-            Id = optionsSnapshot.Value.SuperuserId
-        };
+        if (username.Equals(optionsSnapshot.Value.SuperuserUsername))
+            return new PantheonIdentity
+            {
+                DeviceId = null,
+                Id = optionsSnapshot.Value.SuperuserId
+            };
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var data = await db.UserAccounts
             .FirstOrDefaultAsync(x => x.Username != null && x.Username.Equals(username),
@@ -89,7 +156,7 @@ internal sealed class AthenaApi(IDbContextFactory<AthenaDbContext> contextFactor
 
         if (userId.Equals(optionsSnapshot.Value.SuperuserId))
             return optionsSnapshot.Value.SuperuserPassword.Equals(password);
-        
+
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var passwordHash = await db.UserAccounts.Where(x => x.UserId == userId).Select(x => x.PasswordHash)
