@@ -39,11 +39,6 @@
         <PackageReference Include="Google.Protobuf" Version="3.28.3" />
     </ItemGroup>
     <ItemGroup>
-        <Protobuf Include="..\Athena.SDK\**\*.proto"
-                  GrpcServices="Server"
-                  OutputDir="gen"/>
-    </ItemGroup>
-    <ItemGroup>
       <ProjectReference Include="..\Athena.SDK\Athena.SDK.csproj" />
     </ItemGroup>
     <ItemGroup>

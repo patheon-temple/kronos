@@ -28,6 +28,7 @@ public static class Endpoints
         public static async Task<IResult> Post(
             [FromBody] AuthenticationPostRequest request,
             [FromServices] IHermesApi hermesApi,
+            [FromServices] ILogger<AuthenticationPostRequest> logger,
             CancellationToken cancellationToken = default)
         {
             var validation = await Passwords.CreateValidator().ValidateAsync(new
@@ -45,7 +46,7 @@ public static class Endpoints
             return request.CredentialsType switch
             {
                 CredentialsType.DeviceId => await DeviceIdTokenSet(request, hermesApi, cancellationToken),
-                CredentialsType.Password => await UserCredentialsTokenSet(request, hermesApi, cancellationToken),
+                CredentialsType.Password => await UserCredentialsTokenSet(request, hermesApi, logger, cancellationToken),
                 CredentialsType.Unknown => Results.Problem($"Unknown credentials type: {request.CredentialsType}",
                     statusCode: StatusCodes.Status501NotImplemented),
                 _ => Results.Problem($"Unknown credentials type: {request.CredentialsType}",
@@ -53,12 +54,13 @@ public static class Endpoints
             };
         }
 
-        private static async Task<IResult> UserCredentialsTokenSet(AuthenticationPostRequest request, IHermesApi hermesApi, CancellationToken cancellationToken)
+        private static async Task<IResult> UserCredentialsTokenSet(AuthenticationPostRequest request, IHermesApi hermesApi, ILogger<AuthenticationPostRequest> logger, CancellationToken cancellationToken)
         {
             try
             {
                 var tokenSet = await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
                     request.Password!, cancellationToken);
+                
                 return Results.Ok(new AuthenticationSuccessfulResponse
                 {
                     AccessToken = tokenSet.AccessToken
@@ -66,6 +68,7 @@ public static class Endpoints
             }
             catch (SecurityException e)
             {
+                logger.LogWarning(e, "Security exception");
                 return Results.Unauthorized();
             }
         }

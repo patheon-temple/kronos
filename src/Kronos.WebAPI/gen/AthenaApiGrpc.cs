@@ -176,6 +176,181 @@ namespace Pantheon.Athena.Grpc {
 
     }
 
+    /// <summary>Client for AthenaApiGrpc</summary>
+    public partial class AthenaApiGrpcClient : grpc::ClientBase<AthenaApiGrpcClient>
+    {
+      /// <summary>Creates a new client for AthenaApiGrpc</summary>
+      /// <param name="channel">The channel to use to make remote calls.</param>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public AthenaApiGrpcClient(grpc::ChannelBase channel) : base(channel)
+      {
+      }
+      /// <summary>Creates a new client for AthenaApiGrpc that uses a custom <c>CallInvoker</c>.</summary>
+      /// <param name="callInvoker">The callInvoker to use to make remote calls.</param>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public AthenaApiGrpcClient(grpc::CallInvoker callInvoker) : base(callInvoker)
+      {
+      }
+      /// <summary>Protected parameterless constructor to allow creation of test doubles.</summary>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      protected AthenaApiGrpcClient() : base()
+      {
+      }
+      /// <summary>Protected constructor to allow creation of configured clients.</summary>
+      /// <param name="configuration">The client configuration.</param>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      protected AthenaApiGrpcClient(ClientBaseConfiguration configuration) : base(configuration)
+      {
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity CreateUserFromDeviceId(global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return CreateUserFromDeviceId(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity CreateUserFromDeviceId(global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_CreateUserFromDeviceId, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> CreateUserFromDeviceIdAsync(global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return CreateUserFromDeviceIdAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> CreateUserFromDeviceIdAsync(global::Pantheon.Athena.Grpc.CreateUserFromDeviceIdRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_CreateUserFromDeviceId, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity CreateUserFromUsername(global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return CreateUserFromUsername(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity CreateUserFromUsername(global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_CreateUserFromUsername, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> CreateUserFromUsernameAsync(global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return CreateUserFromUsernameAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> CreateUserFromUsernameAsync(global::Pantheon.Athena.Grpc.CreateUserFromUsernameRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_CreateUserFromUsername, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity GetUserByDeviceId(global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetUserByDeviceId(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity GetUserByDeviceId(global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_GetUserByDeviceId, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> GetUserByDeviceIdAsync(global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetUserByDeviceIdAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> GetUserByDeviceIdAsync(global::Pantheon.Athena.Grpc.GetUserByDeviceIdRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_GetUserByDeviceId, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity GetUserById(global::Pantheon.Athena.Grpc.GetUserByIdRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetUserById(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity GetUserById(global::Pantheon.Athena.Grpc.GetUserByIdRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_GetUserById, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> GetUserByIdAsync(global::Pantheon.Athena.Grpc.GetUserByIdRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetUserByIdAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> GetUserByIdAsync(global::Pantheon.Athena.Grpc.GetUserByIdRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_GetUserById, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity GetUserByUsername(global::Pantheon.Athena.Grpc.GetUserByUsernameRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetUserByUsername(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.Common.PantheonIdentity GetUserByUsername(global::Pantheon.Athena.Grpc.GetUserByUsernameRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_GetUserByUsername, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> GetUserByUsernameAsync(global::Pantheon.Athena.Grpc.GetUserByUsernameRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetUserByUsernameAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.Common.PantheonIdentity> GetUserByUsernameAsync(global::Pantheon.Athena.Grpc.GetUserByUsernameRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_GetUserByUsername, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.DoesUsernameExistResponse DoesUsernameExist(global::Pantheon.Athena.Grpc.DoesUsernameExistRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return DoesUsernameExist(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.DoesUsernameExistResponse DoesUsernameExist(global::Pantheon.Athena.Grpc.DoesUsernameExistRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_DoesUsernameExist, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.DoesUsernameExistResponse> DoesUsernameExistAsync(global::Pantheon.Athena.Grpc.DoesUsernameExistRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return DoesUsernameExistAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.DoesUsernameExistResponse> DoesUsernameExistAsync(global::Pantheon.Athena.Grpc.DoesUsernameExistRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_DoesUsernameExist, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.VerifyPasswordResponse VerifyPassword(global::Pantheon.Athena.Grpc.VerifyPasswordRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return VerifyPassword(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Pantheon.Athena.Grpc.VerifyPasswordResponse VerifyPassword(global::Pantheon.Athena.Grpc.VerifyPasswordRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_VerifyPassword, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.VerifyPasswordResponse> VerifyPasswordAsync(global::Pantheon.Athena.Grpc.VerifyPasswordRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return VerifyPasswordAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Pantheon.Athena.Grpc.VerifyPasswordResponse> VerifyPasswordAsync(global::Pantheon.Athena.Grpc.VerifyPasswordRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_VerifyPassword, null, options, request);
+      }
+      /// <summary>Creates a new instance of client from given <c>ClientBaseConfiguration</c>.</summary>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      protected override AthenaApiGrpcClient NewInstance(ClientBaseConfiguration configuration)
+      {
+        return new AthenaApiGrpcClient(configuration);
+      }
+    }
+
     /// <summary>Creates service definition that can be registered with a server</summary>
     /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
