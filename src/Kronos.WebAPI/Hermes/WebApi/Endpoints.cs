@@ -52,7 +52,10 @@ public static class Endpoints
 
                 return Results.Ok(new AuthenticationSuccessfulResponse
                 {
-                    AccessToken = tokenSet.AccessToken
+                    AccessToken = tokenSet.AccessToken,
+                    Id = tokenSet.UserId,
+                    Scopes = tokenSet.Scopes,
+                    Username = tokenSet.Username
                 });
             }
             catch (SecurityException e)
@@ -71,7 +74,10 @@ public static class Endpoints
             var tokenSet = await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!, request.RequestedScopes, cancellationToken);
             return Results.Ok(new AuthenticationSuccessfulResponse
             {
-                AccessToken = tokenSet.AccessToken
+                AccessToken = tokenSet.AccessToken,
+                Id = tokenSet.UserId,
+                Scopes = tokenSet.Scopes,
+                Username = tokenSet.Username
             });
         }
     }

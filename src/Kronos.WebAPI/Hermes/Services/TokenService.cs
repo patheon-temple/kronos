@@ -10,7 +10,7 @@ namespace Kronos.WebAPI.Hermes.Services;
 
 public class TokenService(IOptions<JwtConfig> options)
 {
-    public string CreateAccessToken(PantheonIdentity args, string[] requestedScopes)
+    public string CreateAccessToken(string? username, Guid id, string[] scopes)
     {
         var handler = new JwtSecurityTokenHandler();
 
@@ -21,10 +21,10 @@ public class TokenService(IOptions<JwtConfig> options)
 
         IEnumerable<Claim?> enumerable =
         [
-            string.IsNullOrWhiteSpace(args.Username)
+            string.IsNullOrWhiteSpace(username)
                 ? null
-                : new Claim(JwtRegisteredClaimNames.Nickname, args.Username),
-            new(ClaimTypes.Name, args.Id.ToString("N"))
+                : new Claim(JwtRegisteredClaimNames.Nickname, username),
+            new(ClaimTypes.Name, id.ToString("N"))
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -33,7 +33,7 @@ public class TokenService(IOptions<JwtConfig> options)
             Expires = DateTime.UtcNow.AddHours(1),
             Subject = new ClaimsIdentity(
                 enumerable.Where(x => x is not null).Cast<Claim>()
-                    .Union(args.Scopes.Where(requestedScopes.Contains).Select(x => new Claim(ClaimTypes.Role, x)))
+                    .Union(scopes.Select(x => new Claim(ClaimTypes.Role, x)))
             ),
             Audience = options.Value.Audience,
             Issuer = options.Value.Issuer
