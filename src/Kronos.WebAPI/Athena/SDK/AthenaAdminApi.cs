@@ -12,7 +12,11 @@ namespace Kronos.WebAPI.Athena.SDK;
 internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextFactory, IAthenaApi athenaApi)
     : IAthenaAdminApi
 {
-    public async Task<PantheonIdentity> CreateUserAsync(string? deviceId, string? username, string? password,
+    public async Task<PantheonIdentity> CreateUserAsync(
+        string? deviceId,
+        string? username,
+        string? password,
+        string[] scopes,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(deviceId) && string.IsNullOrWhiteSpace(username))
@@ -25,11 +29,16 @@ internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextF
         }
 
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var scopeEntities = await db.Scopes
+            .Where(x => scopes.Contains(x.Id))
+            .ToArrayAsync(cancellationToken: cancellationToken);
+
         var identity = new UserAccountDataModel
         {
             DeviceId = deviceId,
             PasswordHash = string.IsNullOrWhiteSpace(password) ? null : Passwords.HashPassword(password),
-            Username = username?.ToLower()
+            Username = username?.ToLower(),
+            Scopes = scopeEntities
         };
         db.UserAccounts.Add(identity);
         await db.SaveChangesAsync(cancellationToken);

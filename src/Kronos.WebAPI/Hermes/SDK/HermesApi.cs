@@ -7,17 +7,13 @@ namespace Kronos.WebAPI.Hermes.SDK;
 
 internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService) : IHermesApi
 {
-    public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, CancellationToken cancellationToken)
+    public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, string[] requestedScop, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceId);
         var identity = await athenaApi.GetUserByDeviceIdAsync(deviceId, cancellationToken) ??
                        await athenaApi.CreateUserFromDeviceIdAsync(deviceId, CancellationToken.None);
 
-        var accessToken = tokenService.CreateAccessToken(new TokenCreationArgs
-        {
-            DeviceId = identity.DeviceId,
-            UserId = identity.Id
-        });
+        var accessToken = tokenService.CreateAccessToken(identity, requestedScop);
 
         return new TokenSet
         {
@@ -25,7 +21,7 @@ internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService) : IHer
         };
     }
 
-    public async Task<TokenSet> CreateTokenSetForUserCredentialsAsync(string username, string password,
+    public async Task<TokenSet> CreateTokenSetForUserCredentialsAsync(string username, string password, string[] requestedScopes,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(username);
@@ -44,12 +40,7 @@ internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService) : IHer
             throw new SecurityException();
         }
 
-        var accessToken = tokenService.CreateAccessToken(new TokenCreationArgs
-        {
-            UserId = identity.Id,
-            Username = username,
-            IsVerified = false
-        });
+        var accessToken = tokenService.CreateAccessToken(identity, requestedScopes);
 
         return new TokenSet
         {

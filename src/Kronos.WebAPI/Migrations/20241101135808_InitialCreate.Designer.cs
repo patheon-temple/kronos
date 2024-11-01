@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kronos.WebAPI.Migrations
 {
     [DbContext(typeof(AthenaDbContext))]
-    [Migration("20241031084550_Scopes")]
-    partial class Scopes
+    [Migration("20241101135808_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,59 +40,50 @@ namespace Kronos.WebAPI.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.HasKey("Id")
-                        .HasName("PK_scope_id");
+                    b.HasKey("Id");
 
-                    b.ToTable("scopes", "athena");
+                    b.ToTable("Scopes", "athena");
                 });
 
             modelBuilder.Entity("Kronos.WebAPI.Athena.Data.ServiceAccountDataModel", b =>
                 {
                     b.Property<Guid>("ServiceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("service_id");
+                        .HasColumnType("uuid");
 
                     b.Property<byte[]>("Secret")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("bytea")
-                        .HasColumnName("secret");
+                        .HasColumnType("bytea");
 
-                    b.HasKey("ServiceId")
-                        .HasName("PK_service_account_id");
+                    b.HasKey("ServiceId");
 
-                    b.ToTable("service_accounts", "athena");
+                    b.ToTable("ServiceAccounts", "athena");
                 });
 
             modelBuilder.Entity("Kronos.WebAPI.Athena.Data.UserAccountDataModel", b =>
                 {
                     b.Property<Guid>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("DeviceId")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("device_id");
+                        .HasColumnType("character varying(128)");
 
                     b.Property<byte[]>("PasswordHash")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bytea")
-                        .HasColumnName("password_hash");
+                        .HasColumnType("bytea");
 
                     b.Property<string>("Username")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("username");
+                        .HasColumnType("character varying(128)");
 
-                    b.HasKey("UserId")
-                        .HasName("PK_user_account_id");
+                    b.HasKey("UserId");
 
-                    b.ToTable("user_accounts", "athena");
+                    b.ToTable("UserAccounts", "athena");
                 });
 
             modelBuilder.Entity("Kronos.WebAPI.Athena.Data.UserScopeDataModel", b =>
@@ -103,18 +94,11 @@ namespace Kronos.WebAPI.Migrations
                     b.Property<Guid>("UserAccountsUserId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ScopeId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("ScopesId", "UserAccountsUserId");
 
                     b.HasIndex("UserAccountsUserId");
 
-                    b.ToTable("users_scopes", "athena");
+                    b.ToTable("UsersScopes", "athena");
                 });
 
             modelBuilder.Entity("Kronos.WebAPI.Athena.Data.UserScopeDataModel", b =>

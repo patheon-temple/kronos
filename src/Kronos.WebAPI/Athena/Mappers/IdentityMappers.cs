@@ -10,7 +10,9 @@ public static class IdentityMappers
     {
         DeviceId = data.DeviceId,
         Id = data.UserId,
-        PasswordHash = data.PasswordHash
+        PasswordHash = data.PasswordHash,
+        Username = data.Username,
+        Scopes = data.Scopes.Select(x => x.Id).ToArray(),
     };
 
     public static Pantheon.Athena.Grpc.Common.PantheonIdentity ToGrpc(PantheonIdentity identity) =>
@@ -18,5 +20,7 @@ public static class IdentityMappers
         {
             Id = ByteString.CopyFrom(identity.Id.ToByteArray()),
             DeviceId = identity.DeviceId ?? string.Empty,
+            Scopes = { identity.Scopes },
+            Username = identity.Username ?? string.Empty,
         };
 }

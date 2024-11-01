@@ -37,8 +37,10 @@ internal sealed class AthenaApi(
         CancellationToken cancellationToken = default)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var entity = await db.UserAccounts.FirstOrDefaultAsync(
-            x => x.DeviceId != null && x.DeviceId.Equals(deviceId), cancellationToken: cancellationToken);
+        var entity = await db.UserAccounts
+            .Include(x => x.Scopes)
+            .FirstOrDefaultAsync(x => x.DeviceId != null && x.DeviceId.Equals(deviceId),
+                cancellationToken: cancellationToken);
         return entity is null ? null : IdentityMappers.ToDomain(entity);
     }
 
@@ -70,7 +72,8 @@ internal sealed class AthenaApi(
         return IdentityMappers.ToDomain(entity);
     }
 
-    private async Task IsUsernameAndPasswordValidOrThrowAsync(string username, string password, CancellationToken cancellationToken)
+    private async Task IsUsernameAndPasswordValidOrThrowAsync(string username, string password,
+        CancellationToken cancellationToken)
     {
         if (await DoesUsernameExistAsync(username, cancellationToken))
             throw new ValidationException("Username already exists.");
@@ -94,10 +97,11 @@ internal sealed class AthenaApi(
             return new PantheonIdentity
             {
                 DeviceId = null,
-                Id = optionsSnapshot.Value.SuperuserId
+                Id = optionsSnapshot.Value.SuperuserId,
+                Scopes = [WebAPI.Definitions.Scopes.Superuser]
             };
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = await db.UserAccounts
+        var data = await db.UserAccounts.Include(x => x.Scopes)
             .FirstOrDefaultAsync(x => x.Username != null && x.Username.Equals(username),
                 cancellationToken: cancellationToken);
 
@@ -125,7 +129,7 @@ internal sealed class AthenaApi(
     public async Task<PantheonIdentity?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = await db.UserAccounts
+        var data = await db.UserAccounts.Include(x => x.Scopes)
             .FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken: cancellationToken);
 
         return data is null ? null : IdentityMappers.ToDomain(data);

@@ -11,4 +11,5 @@ message CreateUserRequest {
   string Username = 1;
   string Password = 2;
   string DeviceId = 3;
+  repeated string DefaultScopes = 4;
 }

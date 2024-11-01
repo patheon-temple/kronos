@@ -24,16 +24,16 @@ namespace Pantheon.Athena.Grpc.Admin {
     static AthenaAdminApiReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChRBdGhlbmFBZG1pbkFwaS5wcm90bxoSQXRoZW5hQ29tbW9uLnByb3RvIkkK",
+            "ChRBdGhlbmFBZG1pbkFwaS5wcm90bxoSQXRoZW5hQ29tbW9uLnByb3RvImAK",
             "EUNyZWF0ZVVzZXJSZXF1ZXN0EhAKCFVzZXJuYW1lGAEgASgJEhAKCFBhc3N3",
-            "b3JkGAIgASgJEhAKCERldmljZUlkGAMgASgJMkkKEkF0aGVuYUFkbWluQXBp",
-            "R3JwYxIzCgpDcmVhdGVVc2VyEhIuQ3JlYXRlVXNlclJlcXVlc3QaES5QYW50",
-            "aGVvbklkZW50aXR5Qh2qAhpQYW50aGVvbi5BdGhlbmEuR3JwYy5BZG1pbmIG",
-            "cHJvdG8z"));
+            "b3JkGAIgASgJEhAKCERldmljZUlkGAMgASgJEhUKDURlZmF1bHRTY29wZXMY",
+            "BCADKAkySQoSQXRoZW5hQWRtaW5BcGlHcnBjEjMKCkNyZWF0ZVVzZXISEi5D",
+            "cmVhdGVVc2VyUmVxdWVzdBoRLlBhbnRoZW9uSWRlbnRpdHlCHaoCGlBhbnRo",
+            "ZW9uLkF0aGVuYS5HcnBjLkFkbWluYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Pantheon.Athena.Grpc.Common.AthenaCommonReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.Admin.CreateUserRequest), global::Pantheon.Athena.Grpc.Admin.CreateUserRequest.Parser, new[]{ "Username", "Password", "DeviceId" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pantheon.Athena.Grpc.Admin.CreateUserRequest), global::Pantheon.Athena.Grpc.Admin.CreateUserRequest.Parser, new[]{ "Username", "Password", "DeviceId", "DefaultScopes" }, null, null, null, null)
           }));
     }
     #endregion
@@ -78,6 +78,7 @@ namespace Pantheon.Athena.Grpc.Admin {
       username_ = other.username_;
       password_ = other.password_;
       deviceId_ = other.deviceId_;
+      defaultScopes_ = other.defaultScopes_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -123,6 +124,17 @@ namespace Pantheon.Athena.Grpc.Admin {
       }
     }
 
+    /// <summary>Field number for the "DefaultScopes" field.</summary>
+    public const int DefaultScopesFieldNumber = 4;
+    private static readonly pb::FieldCodec<string> _repeated_defaultScopes_codec
+        = pb::FieldCodec.ForString(34);
+    private readonly pbc::RepeatedField<string> defaultScopes_ = new pbc::RepeatedField<string>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<string> DefaultScopes {
+      get { return defaultScopes_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -141,6 +153,7 @@ namespace Pantheon.Athena.Grpc.Admin {
       if (Username != other.Username) return false;
       if (Password != other.Password) return false;
       if (DeviceId != other.DeviceId) return false;
+      if(!defaultScopes_.Equals(other.defaultScopes_)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -151,6 +164,7 @@ namespace Pantheon.Athena.Grpc.Admin {
       if (Username.Length != 0) hash ^= Username.GetHashCode();
       if (Password.Length != 0) hash ^= Password.GetHashCode();
       if (DeviceId.Length != 0) hash ^= DeviceId.GetHashCode();
+      hash ^= defaultScopes_.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -181,6 +195,7 @@ namespace Pantheon.Athena.Grpc.Admin {
         output.WriteRawTag(26);
         output.WriteString(DeviceId);
       }
+      defaultScopes_.WriteTo(output, _repeated_defaultScopes_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -203,6 +218,7 @@ namespace Pantheon.Athena.Grpc.Admin {
         output.WriteRawTag(26);
         output.WriteString(DeviceId);
       }
+      defaultScopes_.WriteTo(ref output, _repeated_defaultScopes_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -222,6 +238,7 @@ namespace Pantheon.Athena.Grpc.Admin {
       if (DeviceId.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(DeviceId);
       }
+      size += defaultScopes_.CalculateSize(_repeated_defaultScopes_codec);
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -243,6 +260,7 @@ namespace Pantheon.Athena.Grpc.Admin {
       if (other.DeviceId.Length != 0) {
         DeviceId = other.DeviceId;
       }
+      defaultScopes_.Add(other.defaultScopes_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -274,6 +292,10 @@ namespace Pantheon.Athena.Grpc.Admin {
             DeviceId = input.ReadString();
             break;
           }
+          case 34: {
+            defaultScopes_.AddEntriesFrom(input, _repeated_defaultScopes_codec);
+            break;
+          }
         }
       }
     #endif
@@ -303,6 +325,10 @@ namespace Pantheon.Athena.Grpc.Admin {
           }
           case 26: {
             DeviceId = input.ReadString();
+            break;
+          }
+          case 34: {
+            defaultScopes_.AddEntriesFrom(ref input, _repeated_defaultScopes_codec);
             break;
           }
         }

@@ -24,6 +24,7 @@ try
     services.AddValidatorsFromAssemblyContaining<Program>();
     services.AddFluentValidationRulesToSwagger();
     services.AddCors();
+    
     var jwtOptionsSection = builder.Configuration
         .GetRequiredSection("Jwt")
         .Get<JwtConfig>() ?? throw new NullReferenceException("No Jwt section");

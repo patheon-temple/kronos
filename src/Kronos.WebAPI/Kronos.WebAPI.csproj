@@ -22,6 +22,7 @@
         <PackageReference Include="FluentValidation" Version="11.10.0" />
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
+        <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.66.0" />
         <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="6.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
         <PackageReference Include="Microsoft.AspNetCore.Grpc.Swagger" Version="0.8.10" />
@@ -43,5 +44,6 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="gen\" />
+      <Folder Include="Migrations\" />
     </ItemGroup>
 </Project>

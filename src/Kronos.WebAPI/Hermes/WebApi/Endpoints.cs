@@ -1,4 +1,5 @@
 ﻿using System.Security;
+using FluentValidation;
 using Kronos.WebAPI.Athena.Crypto;
 using Kronos.WebAPI.Hermes.SDK;
 using Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
@@ -31,18 +32,6 @@ public static class Endpoints
             [FromServices] ILogger<AuthenticationPostRequest> logger,
             CancellationToken cancellationToken = default)
         {
-            var validation = await Passwords.CreateValidator().ValidateAsync(new
-                UserCredentialsValidationParams
-                {
-                    Password = request.Password,
-                    Username = request.Username,
-                }, cancellationToken);
-            
-            if (!validation.IsValid)
-            {
-                return Results.ValidationProblem(validation.ToDictionary());
-            }
-
             return request.CredentialsType switch
             {
                 CredentialsType.DeviceId => await DeviceIdTokenSet(request, hermesApi, cancellationToken),
@@ -59,8 +48,8 @@ public static class Endpoints
             try
             {
                 var tokenSet = await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
-                    request.Password!, cancellationToken);
-                
+                    request.Password!, request.RequestedScopes, cancellationToken);
+
                 return Results.Ok(new AuthenticationSuccessfulResponse
                 {
                     AccessToken = tokenSet.AccessToken
@@ -71,11 +60,15 @@ public static class Endpoints
                 logger.LogWarning(e, "Security exception");
                 return Results.Unauthorized();
             }
+            catch (ValidationException e)
+            {
+                return Results.BadRequest(e.Message);
+            }
         }
 
         private static async Task<IResult> DeviceIdTokenSet(AuthenticationPostRequest request, IHermesApi hermesApi, CancellationToken cancellationToken = default)
         {
-            var tokenSet = await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!, cancellationToken);
+            var tokenSet = await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!, request.RequestedScopes, cancellationToken);
             return Results.Ok(new AuthenticationSuccessfulResponse
             {
                 AccessToken = tokenSet.AccessToken
