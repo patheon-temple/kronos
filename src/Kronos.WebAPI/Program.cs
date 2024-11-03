@@ -1,7 +1,6 @@
 using System.Text;
 using FluentValidation;
 using Kronos.WebAPI;
-using Kronos.WebAPI.Athena;
 using Kronos.WebAPI.Hermes.SDK;
 using Kronos.WebAPI.Hermes.WebApi;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
@@ -85,8 +84,8 @@ try
     }
 
     app.UsePantheonRequestContext();
-    AppInstaller.Install(app);
-    Endpoints.Register(app);
+    Kronos.WebAPI.Athena.AppInstaller.Install(app);
+    Kronos.WebAPI.Hermes.AppInstaller.Install(app);
     Kronos.WebAPI.Kronos.WebApi.Endpoints.Register(app);
 
     app.Run();
