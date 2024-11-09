@@ -1,5 +1,4 @@
 using System.Net.Mime;
-using Kronos.Dtos;
 using Kronos.WebAPI.Hermes.SDK;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,4 +39,27 @@ public static class Endpoints
             _ => throw new ArgumentOutOfRangeException()
         };
     }
+}
+
+public record AuthenticationSuccessfulResponse(string AccessToken, string UserId, string[] Scopes, string? Username);
+
+public class AuthenticationPostRequest
+{
+    public AuthenticationPostRequest(string? username)
+    {
+        Username = username;
+    }
+
+    public CredentialsType CredentialsType { get; set; } = CredentialsType.DeviceId;
+    public string[] RequestedScopes { get; set; } = [];
+    public string? Password { get; set; }
+    public string? DeviceId { get; set; }
+    public string? Username { get; set; }
+}
+
+public enum CredentialsType
+{
+    Unknown = 0,
+    DeviceId =1,
+    Password
 }

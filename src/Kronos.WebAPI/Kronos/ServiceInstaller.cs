@@ -40,8 +40,13 @@ public static class ServiceInstaller
             // this enables binding ApiVersion as a endpoint callback parameter. if you don't use it, then
             // you should remove this configuration.
             .EnableApiVersionBinding();
-        services.AddSwaggerGen();
-        
+        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+        services.AddSwaggerGen( options =>
+        {
+            options.DocumentFilter<TagDescriptionsDocumentFilter>();
+            options.SchemaFilter<EnumSchemaFilter>();
+            options.OperationFilter<SwaggerDefaultValues>();
+        });
         services.AddOptions<ServiceDiscovery>()
             .BindConfiguration("Kronos:Discovery")
             .ValidateDataAnnotations()
