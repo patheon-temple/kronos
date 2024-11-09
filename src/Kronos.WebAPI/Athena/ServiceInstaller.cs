@@ -18,11 +18,6 @@ public static class ServiceInstaller
         services.AddScoped<IAthenaAdminApi, AthenaAdminApi>();
         services.AddPooledDbContextFactory<AthenaDbContext>(opt =>
             opt.UseNpgsql(configuration.GetConnectionString("Postge_Athena")));
-        services.AddGrpc(x =>
-        {
-            x.EnableDetailedErrors = true;
-        });
-        services.AddGrpcReflection();
         services.AddTransient<IValidator<UserCredentialsValidationParams>>(x => Passwords.CreateValidator());
     }
 }

@@ -1,0 +1,22 @@
+{
+  "runtime": "Net80",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "./lib/open-api.yml"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "generateClientClasses": false,
+      "generateClientInterfaces": false,
+      "generateDtoTypes": true,
+      "namespace": "Kronos.Dtos",
+      "classStyle": "Record",
+      "jsonLibrary": "SystemTextJson",
+      "generateNullableReferenceTypes": true,
+      "generateDataAnnotations": true,
+      "output": "./src/Kronos.WebApi/Generated/OpenApiDtos.cs"
+    }
+  }
+}

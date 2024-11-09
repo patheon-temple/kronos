@@ -1,5 +1,4 @@
 using Athena.SDK.Models;
-using Google.Protobuf;
 using Kronos.WebAPI.Athena.Data;
 
 namespace Kronos.WebAPI.Athena.Mappers;
@@ -14,13 +13,4 @@ public static class IdentityMappers
         Username = data.Username,
         Scopes = data.Scopes.Select(x => x.Id).ToArray(),
     };
-
-    public static Pantheon.Athena.Grpc.Common.PantheonIdentity ToGrpc(PantheonIdentity identity) =>
-        new()
-        {
-            Id = ByteString.CopyFrom(identity.Id.ToByteArray()),
-            DeviceId = identity.DeviceId ?? string.Empty,
-            Scopes = { identity.Scopes },
-            Username = identity.Username ?? string.Empty,
-        };
 }
