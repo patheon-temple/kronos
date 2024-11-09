@@ -24,18 +24,8 @@
         <ProjectReference Include="..\..\src\Athena.SDK\Athena.SDK.csproj"/>
     </ItemGroup>
     <ItemGroup>
-        <Protobuf Include="..\..\src\Athena.SDK\**\*.proto" 
-                  GrpcServices="Client" 
-                  OutputDir="gen"/>
-        <None Include="docs\Readme.md" Pack="true" PackagePath="\"/>
-    </ItemGroup>
-    <ItemGroup>
         <PackageReference Include="Google.Protobuf" Version="3.28.3" />
         <PackageReference Include="Grpc.Net.Client" Version="2.52.0" />
-        <PackageReference Include="Grpc.Tools" Version="2.67.0">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
     </ItemGroup>
 
 </Project>

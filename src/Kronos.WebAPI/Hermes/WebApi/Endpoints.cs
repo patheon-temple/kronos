@@ -1,8 +1,6 @@
-﻿using System.Security;
-using Kronos.WebAPI.Athena.Crypto;
+using System.Net.Mime;
+using Kronos.Dtos;
 using Kronos.WebAPI.Hermes.SDK;
-using Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
-using Kronos.WebAPI.Hermes.WebApi.Interop.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kronos.WebAPI.Hermes.WebApi;
@@ -12,71 +10,34 @@ public static class Endpoints
     public static void Register(WebApplication app)
     {
         var builder = app.NewVersionedApi("Hermes");
-        var apiV1 = builder.MapGroup("/hermes/api/v{version:apiVersion}").HasApiVersion(1.0);
-
-        apiV1
-            .MapPost("/tokens", Tokens.Post)
-            .Accepts<AuthenticationPostRequest>("application/json")
-            .Produces<AuthenticationSuccessfulResponse>()
-            .Produces(400)
-            .ProducesValidationProblem()
-            .MapToApiVersion(1.0);
+        var v1 = builder.MapGroup("/hermes/api/v{v:apiVersion}").HasApiVersion(1.0);
+        v1.MapPost("/authenticate", PostAuthenticate)
+            .Produces<AuthenticationSuccessfulResponse>(200, MediaTypeNames.Application.Json)
+            .WithDescription("Authentication endpoint");
     }
 
-    private static class Tokens
+    private static async Task<IResult> PostAuthenticate(
+        [FromBody] AuthenticationPostRequest request,
+        [FromServices] IHermesApi hermesApi,
+        CancellationToken cancellationToken = default)
     {
-        public static async Task<IResult> Post(
-            [FromBody] AuthenticationPostRequest request,
-            [FromServices] IHermesApi hermesApi,
-            CancellationToken cancellationToken = default)
-        {
-            var validation = await Passwords.CreateValidator().ValidateAsync(new
-                UserCredentialsValidationParams
-                {
-                    Password = request.Password,
-                    Username = request.Username,
-                }, cancellationToken);
-            
-            if (!validation.IsValid)
-            {
-                return Results.ValidationProblem(validation.ToDictionary());
-            }
+        var tokenSet = await GetTokenSet(request, hermesApi, cancellationToken);
 
-            return request.CredentialsType switch
-            {
-                CredentialsType.DeviceId => await DeviceIdTokenSet(request, hermesApi, cancellationToken),
-                CredentialsType.Password => await UserCredentialsTokenSet(request, hermesApi, cancellationToken),
-                CredentialsType.Unknown => Results.Problem($"Unknown credentials type: {request.CredentialsType}",
-                    statusCode: StatusCodes.Status501NotImplemented),
-                _ => Results.Problem($"Unknown credentials type: {request.CredentialsType}",
-                    statusCode: StatusCodes.Status501NotImplemented)
-            };
-        }
+        return Results.Ok(new AuthenticationSuccessfulResponse(tokenSet.AccessToken, tokenSet.UserId, tokenSet.Scopes,
+            tokenSet.Username));
+    }
 
-        private static async Task<IResult> UserCredentialsTokenSet(AuthenticationPostRequest request, IHermesApi hermesApi, CancellationToken cancellationToken)
+    private static async Task<TokenSet> GetTokenSet(AuthenticationPostRequest request, IHermesApi hermesApi,
+        CancellationToken cancellationToken)
+    {
+        return request.CredentialsType switch
         {
-            try
-            {
-                var tokenSet = await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
-                    request.Password!, cancellationToken);
-                return Results.Ok(new AuthenticationSuccessfulResponse
-                {
-                    AccessToken = tokenSet.AccessToken
-                });
-            }
-            catch (SecurityException e)
-            {
-                return Results.Unauthorized();
-            }
-        }
-
-        private static async Task<IResult> DeviceIdTokenSet(AuthenticationPostRequest request, IHermesApi hermesApi, CancellationToken cancellationToken = default)
-        {
-            var tokenSet = await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!, cancellationToken);
-            return Results.Ok(new AuthenticationSuccessfulResponse
-            {
-                AccessToken = tokenSet.AccessToken
-            });
-        }
+            CredentialsType.DeviceId => await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!,
+                request.RequestedScopes!.ToArray(), cancellationToken),
+            CredentialsType.Password => await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
+                request.Password!, request.RequestedScopes!.ToArray(), cancellationToken),
+            CredentialsType.Unknown => throw new ArgumentOutOfRangeException(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 }

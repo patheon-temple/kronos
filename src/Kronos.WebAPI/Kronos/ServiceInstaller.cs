@@ -1,7 +1,5 @@
-﻿using System.Reflection;
-using Asp.Versioning;
+﻿using Asp.Versioning;
 using Kronos.WebAPI.Kronos.Domain;
-using Kronos.WebAPI.Swagger;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -42,7 +40,6 @@ public static class ServiceInstaller
             // this enables binding ApiVersion as a endpoint callback parameter. if you don't use it, then
             // you should remove this configuration.
             .EnableApiVersionBinding();
-        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
         services.AddSwaggerGen();
         
         services.AddOptions<ServiceDiscovery>()

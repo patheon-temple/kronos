@@ -1,23 +1,16 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Athena.SDK.Models;
 using Kronos.WebAPI.Hermes.WebApi;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Kronos.WebAPI.Hermes.Services;
 
-public sealed class TokenCreationArgs
-{
-    public string? DeviceId { get; set; }
-    public Guid UserId { get; set; }
-    public string? Username { get; set; }
-    public bool IsVerified { get; set; }
-}
-
 public class TokenService(IOptions<JwtConfig> options)
 {
-    public string CreateAccessToken(TokenCreationArgs args)
+    public string CreateAccessToken(string? username, Guid id, string[] scopes)
     {
         var handler = new JwtSecurityTokenHandler();
 
@@ -28,17 +21,19 @@ public class TokenService(IOptions<JwtConfig> options)
 
         IEnumerable<Claim?> enumerable =
         [
-            string.IsNullOrWhiteSpace(args.DeviceId) ? null : new Claim(Definitions.ClaimTypes.DeviceId, args.DeviceId),
-            string.IsNullOrWhiteSpace(args.Username) ? null : new Claim(JwtRegisteredClaimNames.Nickname, args.Username),
-            new Claim(ClaimTypes.Name, args.UserId.ToString("N"))
+            string.IsNullOrWhiteSpace(username)
+                ? null
+                : new Claim(JwtRegisteredClaimNames.Nickname, username),
+            new(ClaimTypes.Name, id.ToString("N"))
         ];
-        
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             SigningCredentials = credentials,
             Expires = DateTime.UtcNow.AddHours(1),
             Subject = new ClaimsIdentity(
                 enumerable.Where(x => x is not null).Cast<Claim>()
+                    .Union(scopes.Select(x => new Claim(ClaimTypes.Role, x)))
             ),
             Audience = options.Value.Audience,
             Issuer = options.Value.Issuer
