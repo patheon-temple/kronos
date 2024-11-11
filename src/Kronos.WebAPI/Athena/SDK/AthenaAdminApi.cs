@@ -46,6 +46,16 @@ internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextF
         return IdentityMappers.ToDomain(identity);
     }
 
+    public async Task<PantheonIdentity?> GetUserAccountByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var data = await db.UserAccounts.Include(x => x.Scopes)
+            .FirstOrDefaultAsync(x => x.UserId == id, cancellationToken: cancellationToken);
+
+        return data is null ? null : IdentityMappers.ToDomain(data);
+    }
+
     private async Task IsUsernameAndPasswordValidOrThrowAsync(string username, string? password,
         CancellationToken cancellationToken)
     {

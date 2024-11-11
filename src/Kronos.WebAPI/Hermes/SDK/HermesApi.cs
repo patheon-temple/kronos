@@ -3,17 +3,27 @@ using Athena.SDK;
 using Athena.SDK.Models;
 using Kronos.WebAPI.Hermes.Exceptions;
 using Kronos.WebAPI.Hermes.Services;
+using Kronos.WebAPI.Hermes.WebApi;
+using Microsoft.Extensions.Options;
 
 namespace Kronos.WebAPI.Hermes.SDK;
 
-internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService) : IHermesApi
+internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService, IOptions<HermesConfiguration> options)
+    : IHermesApi
 {
     public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, string[] requestedScopes,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceId);
-        var identity = await athenaApi.GetUserByDeviceIdAsync(deviceId, cancellationToken) ??
-                       await athenaApi.CreateUserFromDeviceIdAsync(deviceId, CancellationToken.None);
+        var identity = await athenaApi.GetUserByDeviceIdAsync(deviceId, cancellationToken);
+        if (identity is null)
+        {
+            if (!options.Value.Registration.IsEnabled(CredentialsType.DeviceId))
+                throw new SecurityException("Forbidden");
+
+            identity = await athenaApi.CreateUserFromDeviceIdAsync(deviceId, CancellationToken.None);
+        }
+
         return CreateTokenSet(requestedScopes, identity);
     }
 

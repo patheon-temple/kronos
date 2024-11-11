@@ -10,7 +10,7 @@ public static class Endpoints
 {
     public static void Register(WebApplication app)
     {
-        var builder = app.NewVersionedApi("Kronos").WithTags("Kronos");
+        var builder = app.NewVersionedApi("Kronos");
         var v1 = builder.MapGroup("/kronos/api/v{v:apiVersion}").HasApiVersion(1.0);
         v1.MapGet("/", ([FromServices] IOptionsSnapshot<ServiceDiscovery> options) => Results.Ok(options.Value))
             .WithOpenApi(o =>

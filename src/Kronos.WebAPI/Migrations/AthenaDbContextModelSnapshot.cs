@@ -60,7 +60,7 @@ namespace Kronos.WebAPI.Migrations
 
             modelBuilder.Entity("Kronos.WebAPI.Athena.Data.UserAccountDataModel", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -78,7 +78,7 @@ namespace Kronos.WebAPI.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("UserAccounts", "athena");
                 });

@@ -139,6 +139,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
     {
         swaggerDoc.Tags = new List<OpenApiTag>
         {
+            new() { Name = "Athena", Description = "Everything about orders" },
             new() { Name = "Kronos", Description = "Everything about orders" },
             new() { Name = "Hermes", Description = "Everything about orders" },
         };

@@ -39,6 +39,7 @@
       <ProjectReference Include="..\Athena.SDK\Athena.SDK.csproj" />
     </ItemGroup>
     <ItemGroup>
+      <Folder Include="Athena\WebApi\Interop\Requests\" />
       <Folder Include="Migrations\" />
     </ItemGroup>
 </Project>

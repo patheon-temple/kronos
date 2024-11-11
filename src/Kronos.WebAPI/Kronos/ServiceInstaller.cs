@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Kronos.WebAPI.Kronos.Domain;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Kronos.WebAPI.Kronos;
@@ -43,6 +44,21 @@ public static class ServiceInstaller
         services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
         services.AddSwaggerGen( options =>
         {
+            options.AddServer(new OpenApiServer
+            {
+                Description = "Localhost HTTPS",
+                Url = "https://localhost:7115"
+            });
+            options.AddServer(new OpenApiServer
+            {
+                Description = "Localhost HTTP",
+                Url = "http://localhost:5108"
+            });
+            options.AddServer(new OpenApiServer
+            {
+                Description = "Production",
+                Url = "https://pantheon.obert.cz"
+            });
             options.DocumentFilter<TagDescriptionsDocumentFilter>();
             options.SchemaFilter<EnumSchemaFilter>();
             options.OperationFilter<SwaggerDefaultValues>();
