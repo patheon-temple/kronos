@@ -1,1 +1,1 @@
-spectral lint .\lib\open-api.yml --verbose --ruleset .\.spectral.yaml
+spectral lint http://localhost:5108/swagger/v1/swagger.json --verbose --ruleset .\.spectral.yaml

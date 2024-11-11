@@ -98,7 +98,7 @@ internal sealed class AthenaApi(
             {
                 DeviceId = null,
                 Id = optionsSnapshot.Value.SuperuserId,
-                Scopes = [WebAPI.Definitions.Scopes.Superuser]
+                Scopes = [WebAPI.GlobalDefinitions.Scopes.Superuser]
             };
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var data = await db.UserAccounts.Include(x => x.Scopes)

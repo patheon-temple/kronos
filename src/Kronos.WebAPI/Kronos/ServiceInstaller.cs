@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Kronos.WebAPI.Kronos.Domain;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Kronos.WebAPI.Kronos;
@@ -40,8 +41,28 @@ public static class ServiceInstaller
             // this enables binding ApiVersion as a endpoint callback parameter. if you don't use it, then
             // you should remove this configuration.
             .EnableApiVersionBinding();
-        services.AddSwaggerGen();
-        
+        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+        services.AddSwaggerGen( options =>
+        {
+            options.AddServer(new OpenApiServer
+            {
+                Description = "Localhost HTTPS",
+                Url = "https://localhost:7115"
+            });
+            options.AddServer(new OpenApiServer
+            {
+                Description = "Localhost HTTP",
+                Url = "http://localhost:5108"
+            });
+            options.AddServer(new OpenApiServer
+            {
+                Description = "Production",
+                Url = "https://pantheon.obert.cz"
+            });
+            options.DocumentFilter<TagDescriptionsDocumentFilter>();
+            options.SchemaFilter<EnumSchemaFilter>();
+            options.OperationFilter<SwaggerDefaultValues>();
+        });
         services.AddOptions<ServiceDiscovery>()
             .BindConfiguration("Kronos:Discovery")
             .ValidateDataAnnotations()

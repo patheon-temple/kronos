@@ -10,6 +10,8 @@ public static class ServiceInstaller
     {
         services.AddScoped<IHermesApi, HermesApi>();
         services.AddScoped<TokenService>();
+        services.AddOptions<HermesConfiguration>().BindConfiguration("HermesConfiguration").ValidateOnStart().ValidateDataAnnotations();
+        // TODO: merge with HermesConfiguration
         services.AddOptions<JwtConfig>().BindConfiguration("Jwt").ValidateDataAnnotations().ValidateOnStart();
         
     }

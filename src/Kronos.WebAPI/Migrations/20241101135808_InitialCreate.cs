@@ -79,7 +79,7 @@ namespace Kronos.WebAPI.Migrations
                         column: x => x.UserAccountsUserId,
                         principalSchema: "athena",
                         principalTable: "UserAccounts",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 

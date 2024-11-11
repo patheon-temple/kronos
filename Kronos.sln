@@ -7,7 +7,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{CCD9143F-F98E-4FE8-B211-9878BE6100E9}"
 	ProjectSection(SolutionItems) = preProject
 		lib\.gitignore = lib\.gitignore
-		lib\open-api.yml = lib\open-api.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.SDK", "src\Athena.SDK\Athena.SDK.csproj", "{173E919D-9BD5-43F0-BEA3-7592E2DEB6E4}"
