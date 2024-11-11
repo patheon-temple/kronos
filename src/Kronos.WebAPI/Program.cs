@@ -21,17 +21,21 @@ try
     {
         options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-    
+
     services.AddHostedService<AutoEfMigrationsHostedService>();
     services.AddValidatorsFromAssemblyContaining<Program>();
     services.AddFluentValidationRulesToSwagger();
     services.AddCors();
-    
+
     var jwtOptionsSection = builder.Configuration
         .GetRequiredSection("Jwt")
         .Get<JwtConfig>() ?? throw new NullReferenceException("No Jwt section");
 
-    services.AddAuthorization().AddAuthentication(
+    services.AddAuthorization(o =>
+    {
+        o.AddPolicy(GlobalDefinitions.Policies.SuperUser,
+            policyBuilder => policyBuilder.RequireRole(GlobalDefinitions.Scopes.Superuser));
+    }).AddAuthentication(
         options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -64,7 +68,7 @@ try
     var app = builder.Build();
     app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
     app.UseSwagger();
-    if ( app.Environment.IsDevelopment() )
+    if (app.Environment.IsDevelopment())
     {
         app.UseSwaggerUI(
             options =>
@@ -72,21 +76,22 @@ try
                 var descriptions = app.DescribeApiVersions();
 
                 // build a swagger endpoint for each discovered API version
-                foreach ( var description in descriptions )
+                foreach (var description in descriptions)
                 {
                     var url = $"/swagger/{description.GroupName}/swagger.json";
                     var name = description.GroupName.ToUpperInvariant();
-                    options.SwaggerEndpoint( url, name );
+                    options.SwaggerEndpoint(url, name);
                 }
-            } );
+            });
     }
+
     app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapHealthChecks("/healthz");
 
     app.UsePantheonRequestContext();
-    
+
     Kronos.WebAPI.Athena.WebApi.Endpoints.Register(app);
     Kronos.WebAPI.Hermes.WebApi.Endpoints.Register(app);
     Kronos.WebAPI.Kronos.WebApi.Endpoints.Register(app);

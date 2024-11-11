@@ -10,7 +10,7 @@ public static class Endpoints
     {
         var builder = app.NewVersionedApi("Athena");
         var v1Admin = builder.MapGroup("/athena/api/admin/v{v:apiVersion}").HasApiVersion(1.0);
-        v1Admin.MapPost("account/user", CreateUserAccount).RequireAuthorization().RequireAuthorization(--);
+        v1Admin.MapPost("account/user", CreateUserAccount).RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
         v1Admin.MapGet("account/user/{id:guid}", GetUserAccountByIdAsync).WithName(nameof(GetUserAccountByIdAsync)).RequireAuthorization();
     }
 
