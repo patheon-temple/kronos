@@ -2,7 +2,7 @@
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Dialog from 'primevue/dialog'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useUserStore } from '@/stores/user.store'
 import { createApiClient } from '@/factories/api.factory'
 
@@ -10,6 +10,9 @@ const usernameInput = ref<string | undefined>(undefined)
 const passwordInput = ref<string | undefined>(undefined)
 const deviceIdInput = ref<string | undefined>(undefined)
 const isProcessing = ref<boolean>(false)
+const isPasswordValid = computed(()=>{
+  return /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?])(?=.*[a-z])[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?]{7,128}$/.test(passwordInput.value || '')
+})
 const userStore = useUserStore()
 const createUserAction = async () => {
 
@@ -49,6 +52,7 @@ defineProps<{
       <InputText
         id="password"
         v-model="passwordInput"
+        :invalid="!isPasswordValid"
         class="flex-auto"
         autocomplete="off"
       />

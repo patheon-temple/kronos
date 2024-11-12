@@ -27,6 +27,7 @@ const loginClick = async () => {
       credentialsType: CredentialsType.Password,
       password: passwordInput.value,
       username: usernameInput.value,
+      requestedScopes: ['superuser']
     })
 
     if (!response.ok) {

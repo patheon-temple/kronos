@@ -3,10 +3,10 @@
 export function createApiClient(accessToken?: string) {
   return new Api({
     baseUrl: 'https://localhost:7115',
-    securityWorker: () => ({
+    baseApiParams: {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    }),
+    }
   })
 }
