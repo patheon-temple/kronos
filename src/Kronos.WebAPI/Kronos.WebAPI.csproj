@@ -40,6 +40,5 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Athena\WebApi\Interop\Requests\" />
-      <Folder Include="Migrations\" />
     </ItemGroup>
 </Project>

@@ -60,7 +60,7 @@ namespace Kronos.WebAPI.Migrations
 
             modelBuilder.Entity("Kronos.WebAPI.Athena.Data.UserAccountDataModel", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -78,7 +78,7 @@ namespace Kronos.WebAPI.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
                     b.ToTable("UserAccounts", "athena");
                 });
@@ -91,7 +91,18 @@ namespace Kronos.WebAPI.Migrations
                     b.Property<Guid>("UserAccountsUserId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ScopeId")
+                        .IsRequired()
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("UserAccountUserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("ScopesId", "UserAccountsUserId");
+
+                    b.HasIndex("ScopeId");
+
+                    b.HasIndex("UserAccountUserId");
 
                     b.HasIndex("UserAccountsUserId");
 
@@ -100,9 +111,21 @@ namespace Kronos.WebAPI.Migrations
 
             modelBuilder.Entity("Kronos.WebAPI.Athena.Data.UserScopeDataModel", b =>
                 {
+                    b.HasOne("Kronos.WebAPI.Athena.Data.ScopeDataModel", "Scope")
+                        .WithMany()
+                        .HasForeignKey("ScopeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Kronos.WebAPI.Athena.Data.ScopeDataModel", null)
                         .WithMany()
                         .HasForeignKey("ScopesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kronos.WebAPI.Athena.Data.UserAccountDataModel", "UserAccount")
+                        .WithMany()
+                        .HasForeignKey("UserAccountUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -111,6 +134,10 @@ namespace Kronos.WebAPI.Migrations
                         .HasForeignKey("UserAccountsUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Scope");
+
+                    b.Navigation("UserAccount");
                 });
 #pragma warning restore 612, 618
         }
