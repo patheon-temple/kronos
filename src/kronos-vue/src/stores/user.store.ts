@@ -22,6 +22,8 @@ export const useUserStore = defineStore('user-store', {
       window.localStorage.setItem('authenticationData', JSON.stringify(data))
     },
     invalidateAuthenticationData(): void {
+      this.authenticationData = undefined
+      this.isAuthenticated = false
       window.localStorage.removeItem('authenticationData')
     },
   },

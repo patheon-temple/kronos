@@ -17,15 +17,18 @@
     "generate-api": "swagger-typescript-api -p http://localhost:5108/swagger/v1/swagger.json -o ./src/api"
   },
   "dependencies": {
+    "@primevue/forms": "^4.2.1",
     "@primevue/themes": "^4.1.1",
     "pinia": "^2.2.4",
     "primeicons": "^7.0.0",
     "primevue": "^4.1.1",
     "tailwindcss-primeui": "^0.3.4",
     "vue": "^3.5.12",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@primevue/auto-import-resolver": "^4.2.1",
     "@protobuf-ts/plugin": "^2.9.4",
     "@tsconfig/node20": "^20.1.4",
     "@types/jsdom": "^21.1.7",
@@ -48,6 +51,7 @@
     "start-server-and-test": "^2.0.8",
     "swagger-typescript-api": "^13.0.22",
     "typescript": "~5.5.4",
+    "unplugin-vue-components": "^0.27.4",
     "vite": "^5.4.8",
     "vite-plugin-vue-devtools": "^7.4.6",
     "vitest": "^2.1.2",
