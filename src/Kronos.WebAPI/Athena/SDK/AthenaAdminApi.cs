@@ -1,4 +1,5 @@
-﻿using Athena.SDK;
+﻿using System.Text;
+using Athena.SDK;
 using Athena.SDK.Models;
 using FluentValidation;
 using Kronos.WebAPI.Athena.Crypto;
@@ -28,8 +29,10 @@ internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextF
             await IsUsernameAndPasswordValidOrThrowAsync(username, password, cancellationToken);
         }
 
+        scopes = scopes.Where(x => !x.Equals(GlobalDefinitions.Scopes.Superuser)).ToArray();
+        
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var scopeEntities = await db.Scopes
+        var scopeEntities = await db.UserScopes
             .Where(x => scopes.Contains(x.Id))
             .ToArrayAsync(cancellationToken: cancellationToken);
 
@@ -51,7 +54,7 @@ internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextF
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var data = await db.UserAccounts.Include(x => x.Scopes)
-            .FirstOrDefaultAsync(x => x.UserId == id, cancellationToken: cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken: cancellationToken);
 
         return data is null ? null : IdentityMappers.ToDomain(data);
     }
@@ -70,5 +73,44 @@ internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextF
         }, cancellationToken);
 
         if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
+    }
+
+    public async Task<PantheonService> CreateServiceAccountAsync(string serviceName, string[] requiredScopes,
+        CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        requiredScopes = requiredScopes.Where(x => !x.Equals(GlobalDefinitions.Scopes.Superuser)).ToArray();
+
+        var scopes = requiredScopes.Length == 0
+            ? []
+            : await db.ServiceScopes.Where(x => requiredScopes.Contains(x.Id))
+                .ToArrayAsync(cancellationToken: cancellationToken);
+
+        var data = await db.ServiceAccounts.AddAsync(
+            new ServiceAccountDataModel
+            {
+                Id = Guid.NewGuid(),
+                Name = serviceName,
+                Secret = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N")),
+                Scopes = scopes
+            },
+            cancellationToken: cancellationToken);
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        return ServiceMappers.ToDomain(data.Entity);
+    }
+
+
+    public async Task<PantheonService?> GetServiceAccountByIdAsync(Guid serviceId,
+        CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var data = await db.ServiceAccounts.FirstOrDefaultAsync(x => x.Id == serviceId,
+            cancellationToken: cancellationToken);
+
+        return data == null ? null : ServiceMappers.ToDomain(data);
     }
 }

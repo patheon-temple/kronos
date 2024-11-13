@@ -4,11 +4,12 @@ using Athena.SDK.Models;
 using Kronos.WebAPI.Hermes.Exceptions;
 using Kronos.WebAPI.Hermes.Services;
 using Kronos.WebAPI.Hermes.WebApi;
+using Kronos.WebAPI.Hermes.WebApi.Interop.Shared;
 using Microsoft.Extensions.Options;
 
 namespace Kronos.WebAPI.Hermes.SDK;
 
-internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService, IOptions<HermesConfiguration> options)
+internal class HermesApi(IAthenaApi athenaApi, IAthenaAdminApi athenaAdminApi, TokenService tokenService, IOptions<HermesConfiguration> options)
     : IHermesApi
 {
     public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, string[] requestedScopes,
@@ -27,9 +28,9 @@ internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService, IOptio
         return CreateTokenSet(requestedScopes, identity);
     }
 
-    private static string[] FilterScopes(string[] requestedScopes, PantheonIdentity identity)
+    private static string[] FilterScopes(string[] requestedScopes, string[] availableScopes)
     {
-        var validScopes = requestedScopes.Where(identity.Scopes.Contains).ToArray();
+        var validScopes = requestedScopes.Where(availableScopes.Contains).ToArray();
         return validScopes;
     }
 
@@ -56,10 +57,33 @@ internal class HermesApi(IAthenaApi athenaApi, TokenService tokenService, IOptio
         return CreateTokenSet(requestedScopes, identity);
     }
 
+    public async Task<TokenSet> CreateTokenSetForServiceAsync(Guid serviceId, byte[] secret, string[] requestedScopes,
+        CancellationToken cancellationToken = default)
+    {
+        var service = await athenaAdminApi.GetServiceAccountByIdAsync(serviceId, cancellationToken);
+        if (service is null)
+        {
+            throw new Exception("Service not found");
+        }
+        
+        if(!service.Secret.SequenceEqual(secret)) throw new SecurityException("Secret mismatch");
+        
+        var validScopes = FilterScopes(requestedScopes, service.Scopes);
+
+        var accessToken = tokenService.CreateServiceAccessToken(service.Name, serviceId, validScopes);
+        return new TokenSet
+        {
+            AccessToken = accessToken,
+            Scopes = validScopes,
+            UserId = service.Id.ToString("N"),
+            Username = service.Name
+        };
+    }
+
     private TokenSet CreateTokenSet(string[] requestedScopes, PantheonIdentity identity)
     {
-        var validScopes = FilterScopes(requestedScopes, identity);
-        var accessToken = tokenService.CreateAccessToken(identity.Username, identity.Id,
+        var validScopes = FilterScopes(requestedScopes, identity.Scopes);
+        var accessToken = tokenService.CreateUserAccessToken(identity.Username, identity.Id,
             validScopes);
 
         return new TokenSet

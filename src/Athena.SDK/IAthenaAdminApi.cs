@@ -15,5 +15,11 @@ namespace Athena.SDK
             CancellationToken cancellationToken = default);
 
         Task<PantheonIdentity?> GetUserAccountByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        
+        Task<PantheonService> CreateServiceAccountAsync(string serviceName, string[] requiredScopes,
+            CancellationToken cancellationToken = default);
+
+        Task<PantheonService?> GetServiceAccountByIdAsync(Guid serviceId,
+            CancellationToken cancellationToken = default);
     }
 }

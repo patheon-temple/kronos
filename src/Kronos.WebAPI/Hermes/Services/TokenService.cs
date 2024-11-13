@@ -10,7 +10,16 @@ namespace Kronos.WebAPI.Hermes.Services;
 
 public class TokenService(IOptions<JwtConfig> options)
 {
-    public string CreateAccessToken(string? username, Guid id, string[] scopes)
+    public string CreateUserAccessToken(string? username, Guid id, string[] scopes)
+    {
+        return CreateAccessToken(username, id, scopes, "user");
+    }
+    
+    public string CreateServiceAccessToken(string? username, Guid id, string[] scopes)
+    {
+        return CreateAccessToken(username, id, scopes, "service");
+    }
+    private string CreateAccessToken(string? username, Guid id, string[] scopes, string accountType)
     {
         var handler = new JwtSecurityTokenHandler();
 
@@ -24,7 +33,8 @@ public class TokenService(IOptions<JwtConfig> options)
             string.IsNullOrWhiteSpace(username)
                 ? null
                 : new Claim(JwtRegisteredClaimNames.Nickname, username),
-            new(ClaimTypes.Name, id.ToString("N"))
+            new(ClaimTypes.Name, id.ToString("N")),
+            new(GlobalDefinitions.ClaimTypes.AccountType, accountType),
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor

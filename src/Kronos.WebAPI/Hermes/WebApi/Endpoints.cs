@@ -1,7 +1,11 @@
 using System.Net.Mime;
 using System.Security;
+using System.Text;
 using Kronos.WebAPI.Hermes.SDK;
 using Kronos.WebAPI.Hermes.Services;
+using Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
+using Kronos.WebAPI.Hermes.WebApi.Interop.Responses;
+using Kronos.WebAPI.Hermes.WebApi.Interop.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -55,30 +59,9 @@ public static class Endpoints
             CredentialsType.Password => await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
                 request.Password!, request.RequestedScopes!.ToArray(), cancellationToken),
             CredentialsType.Unknown => throw new ArgumentOutOfRangeException(),
+            CredentialsType.AuthorizationCode => await hermesApi.CreateTokenSetForServiceAsync(request.ServiceId!.Value,
+                Encoding.UTF8.GetBytes(request.AuthorizationCode!), request.RequestedScopes, cancellationToken),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
-}
-
-public record AuthenticationSuccessfulResponse(string AccessToken, string UserId, string[] Scopes, string? Username);
-
-public class AuthenticationPostRequest
-{
-    public AuthenticationPostRequest(string? username)
-    {
-        Username = username;
-    }
-
-    public CredentialsType CredentialsType { get; set; } = CredentialsType.DeviceId;
-    public string[] RequestedScopes { get; set; } = [];
-    public string? Password { get; set; }
-    public string? DeviceId { get; set; }
-    public string? Username { get; set; }
-}
-
-public enum CredentialsType
-{
-    Unknown = 0,
-    DeviceId = 1,
-    Password
 }

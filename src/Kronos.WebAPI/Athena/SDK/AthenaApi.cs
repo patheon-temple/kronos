@@ -1,3 +1,4 @@
+using System.Text;
 using Athena.SDK;
 using Athena.SDK.Models;
 using FluentValidation;
@@ -118,7 +119,7 @@ internal sealed class AthenaApi(
 
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
 
-        var passwordHash = await db.UserAccounts.Where(x => x.UserId == userId).Select(x => x.PasswordHash)
+        var passwordHash = await db.UserAccounts.Where(x => x.Id == userId).Select(x => x.PasswordHash)
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
         if (passwordHash is null) return false;
@@ -130,8 +131,9 @@ internal sealed class AthenaApi(
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var data = await db.UserAccounts.Include(x => x.Scopes)
-            .FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken: cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken: cancellationToken);
 
         return data is null ? null : IdentityMappers.ToDomain(data);
     }
+    
 }

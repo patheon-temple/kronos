@@ -4,7 +4,7 @@ public static class GlobalDefinitions
 {
     public static class ClaimTypes
     {
-        public const string DeviceId = "DeviceId";
+        public const string AccountType = "actp";
     }
 
     internal static class Scopes
