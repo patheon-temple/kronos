@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Menubar from 'primevue/menubar'
-import HealthcheckWidget from '@/components/HealthcheckWidget.vue'
 import { ref } from 'vue'
 import type { MenuItem } from 'primevue/menuitem'
 
@@ -12,6 +11,11 @@ const menuItems = ref<MenuItem[]>([
     label: 'Home',
     route: '/',
     icon: 'pi pi-home',
+  },
+  {
+    label: 'Users',
+    route: '/users',
+    icon: 'pi pi-user',
   }
 ])
 </script>
@@ -35,11 +39,6 @@ const menuItems = ref<MenuItem[]>([
         </template>
       </Menubar>
     </nav>
-    <div class="flex flex-row gap-1 align-items-center">
-      <strong class="my-auto mx-1">Service status</strong>
-      <HealthcheckWidget name="Hermes" />
-      <HealthcheckWidget name="Athena" />
-    </div>
     <RouterView />
     <LoginView />
   </main>

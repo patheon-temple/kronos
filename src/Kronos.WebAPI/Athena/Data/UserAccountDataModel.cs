@@ -11,4 +11,8 @@ public class UserAccountDataModel
     public ICollection<ScopeDataModel> Scopes { get; set; } = new List<ScopeDataModel>();
 }
 
-public class UserScopeDataModel;
+public class UserScopeDataModel
+{
+    public UserAccountDataModel UserAccount { get; set; }
+    public ScopeDataModel Scope { get; set; }
+}

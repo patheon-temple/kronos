@@ -7,39 +7,47 @@ import InputText from 'primevue/inputtext'
 
 import Button from 'primevue/button'
 
-import { useKronos } from '@/stores/kronos'
 import { ref } from 'vue'
-import { useHermesApi } from '@/services/service.factory'
 import { useToast } from 'primevue/usetoast'
 import { useUserStore } from '@/stores/user.store'
+import { Api, CredentialsType } from '@/api/Api'
+import { createApiClient } from '@/factories/api.factory'
 
-const kronos = useKronos()
 const toast = useToast()
 const userStore = useUserStore()
+const usernameInput = ref<string | undefined>(undefined)
+const passwordInput = ref<string | undefined>(undefined)
 
 const isProcessingLogin = ref(false)
 const loginClick = async () => {
   isProcessingLogin.value = true
   try {
-    const hermes = await useHermesApi(kronos.api)
+    const apiClient = createApiClient()
+    const response = await apiClient.hermes.authenticate({
+      credentialsType: CredentialsType.Password,
+      password: passwordInput.value,
+      username: usernameInput.value,
+      requestedScopes: ['superuser']
+    })
 
-    await hermes.authenticateWithDeviceIdAsync('my device id is strong')
-    userStore.isAuthenticated = true
-
+    if (!response.ok) {
+      toast.add({
+        summary: `${response.status}: ${response.statusText}`,
+      })
+      return
+    }
+    userStore.storeAuthenticationData(response.data)
     toast.add({
-      closable: false,
       severity: 'success',
-      life: 1000,
-      summary: 'Login successful',
+      summary: 'Successfully authenticated',
     })
   } catch (error) {
-    userStore.isAuthenticated = false
+    console.error(error)
     toast.add({
-      closable: false,
+      summary:  'Failed to authenticate',
       severity: 'error',
-      life: 1000,
-      summary: error.message,
     })
+    return
   } finally {
     isProcessingLogin.value = false
   }
@@ -57,11 +65,21 @@ const loginClick = async () => {
   >
     <div class="flex items-center gap-4 mb-4">
       <label for="username" class="font-semibold w-24">Username</label>
-      <InputText id="username" class="flex-auto" autocomplete="off" />
+      <InputText
+        id="username"
+        v-model="usernameInput"
+        class="flex-auto"
+        autocomplete="off"
+      />
     </div>
     <div class="flex items-center gap-4 mb-8">
       <label for="password" class="font-semibold w-24">Password</label>
-      <Password id="password" class="flex-auto" autocomplete="off" />
+      <Password
+        id="password"
+        v-model="passwordInput"
+        class="flex-auto"
+        autocomplete="off"
+      />
     </div>
     <div class="flex justify-end gap-2">
       <Button
