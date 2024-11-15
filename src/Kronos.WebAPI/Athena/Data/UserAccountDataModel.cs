@@ -9,3 +9,9 @@ public class UserAccountDataModel
 
     public ICollection<UserScopeDataModel> Scopes { get; set; } = new List<UserScopeDataModel>();
 }
+
+public class UserScopeDataModel
+{
+    public UserAccountDataModel UserAccount { get; set; }
+    public ScopeDataModel Scope { get; set; }
+}
