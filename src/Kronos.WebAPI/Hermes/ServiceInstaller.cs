@@ -1,4 +1,5 @@
-﻿using Kronos.WebAPI.Athena.Infrastructure;
+﻿using Hermes.SDK;
+using Kronos.WebAPI.Athena.Infrastructure;
 using Kronos.WebAPI.Hermes.SDK;
 using Kronos.WebAPI.Hermes.Services;
 using Kronos.WebAPI.Hermes.WebApi;
@@ -11,6 +12,7 @@ public static class ServiceInstaller
     public static void Install(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IHermesApi, HermesApi>();
+        services.AddScoped<IHermesAdminApi, HermesAdminApi>();
         services.AddOptions<HermesConfiguration>().BindConfiguration("HermesConfiguration").ValidateOnStart().ValidateDataAnnotations();
         services.AddOptions<JwtConfig>().BindConfiguration(GlobalDefinitions.ConfigurationKeys.HermesConfiguration).ValidateDataAnnotations().ValidateOnStart();
         services.AddPooledDbContextFactory<HermesDbContext>(opt => opt.UseNpgsql(

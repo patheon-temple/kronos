@@ -12,7 +12,7 @@ public class AutoEfMigrationsHostedService(IServiceProvider serviceProvider) : B
         using var scope = serviceProvider.CreateScope();
         var services = scope.ServiceProvider;
         await DoAutoMigrate<HermesDbContext>(services, stoppingToken);
-       await DoAutoMigrate<AthenaDbContext>(services, stoppingToken);
+        await DoAutoMigrate<AthenaDbContext>(services, stoppingToken);
     }
 
     private static async Task DoAutoMigrate<TDbContext>(IServiceProvider services, CancellationToken stoppingToken)

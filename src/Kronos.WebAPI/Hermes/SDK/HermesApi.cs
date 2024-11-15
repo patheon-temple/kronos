@@ -13,10 +13,9 @@ namespace Kronos.WebAPI.Hermes.SDK;
 internal class HermesApi(
     IAthenaApi athenaApi,
     IAthenaAdminApi athenaAdminApi,
-    IOptions<HermesConfiguration> options,
-    IDbContextFactory<HermesDbContext> contextFactory
-)
-    : IHermesApi
+    IHermesAdminApi hermesAdminApi,
+    IOptions<HermesConfiguration> options
+) : IHermesApi
 {
     public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, string[] requestedScopes, Guid audience,
         CancellationToken cancellationToken)
@@ -31,7 +30,8 @@ internal class HermesApi(
             identity = await athenaApi.CreateUserFromDeviceIdAsync(deviceId, CancellationToken.None);
         }
 
-        var encData = await GetTokenCryptoDataAsyncOrThrow(audience, cancellationToken);
+        var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
+        if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
 
         var validScopes = FilterScopes(requestedScopes, identity.Scopes);
         var accessToken = TokenService.CreateAccessToken(new TokenUserData
@@ -40,7 +40,7 @@ internal class HermesApi(
             Username = identity.Username,
             Scopes = validScopes,
             Id = identity.Id,
-        }, encData, GlobalDefinitions.AccountType.User);
+        }, tokenCryptoData, GlobalDefinitions.AccountType.User);
 
         return new TokenSet
         {
@@ -48,53 +48,6 @@ internal class HermesApi(
             AccessToken = accessToken,
             UserId = identity.Id.ToString(),
             Username = identity.Username,
-        };
-    }
-
-    private async Task<TokenCryptoData> GetTokenCryptoDataAsyncOrThrow(Guid audience,
-        CancellationToken cancellationToken)
-    {
-        if (GlobalDefinitions.Jwt.AthenaAudience.Equals(audience))
-        {
-            return options.Value.Jwt.ToTokenCryptoData();
-        }
-
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = await db.TokenCryptoData.FirstOrDefaultAsync(x => x.EntityId == audience,
-            cancellationToken: cancellationToken);
-
-        if (data is not null)
-            return new TokenCryptoData
-            {
-                EncryptionKey = data.EncryptionKey,
-                EntityId = data.EntityId,
-                SigningKey = data.SigningKey,
-            };
-
-        var doesExists = await athenaAdminApi.ServiceAccountExistsAsync(audience, cancellationToken);
-        if (!doesExists)
-            throw new SecurityException($"No audience with id {audience} found");
-        
-        var encryptionData = new byte[GlobalDefinitions.Limits.EncryptionKeyMaxSize];
-        var signingData = new byte[GlobalDefinitions.Limits.SigningKeyMaxSize];
-        
-        using var rand = RandomNumberGenerator.Create();
-        rand.GetNonZeroBytes(encryptionData);
-        rand.GetNonZeroBytes(signingData);
-        data = new TokenCryptoDataModel
-        {
-            EncryptionKey = encryptionData,
-            SigningKey = signingData,
-            EntityId = audience,
-        };
-        await db.TokenCryptoData.AddAsync(data, cancellationToken);
-        await db.SaveChangesAsync(cancellationToken);
-
-        return new TokenCryptoData
-        {
-            EncryptionKey = data.EncryptionKey,
-            EntityId = data.EntityId,
-            SigningKey = data.SigningKey,
         };
     }
 
@@ -118,8 +71,8 @@ internal class HermesApi(
             throw new SecurityException();
         }
 
-        var encData = await GetTokenCryptoDataAsyncOrThrow(audience, cancellationToken);
-        if (encData is null) throw new SecurityException($"No audience with id {audience} found");
+        var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
+        if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
 
         var validScopes = FilterScopes(requestedScopes, identity.Scopes);
         var accessToken = TokenService.CreateAccessToken(new TokenUserData
@@ -128,7 +81,7 @@ internal class HermesApi(
             Username = identity.Username,
             Scopes = validScopes,
             Id = identity.Id,
-        }, encData, GlobalDefinitions.AccountType.User);
+        }, tokenCryptoData, GlobalDefinitions.AccountType.User);
 
         return new TokenSet
         {
@@ -151,7 +104,9 @@ internal class HermesApi(
 
         if (!service.AuthorizationCode.SequenceEqual(secret)) throw new SecurityException("Secret mismatch");
 
-        var encData = await GetTokenCryptoDataAsyncOrThrow(audience, cancellationToken);
+        var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
+
+        if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
 
         var validScopes = FilterScopes(requestedScopes, service.Scopes);
         var accessToken = TokenService.CreateAccessToken(new TokenUserData
@@ -160,7 +115,7 @@ internal class HermesApi(
             Username = service.Id.ToString("N"),
             Scopes = validScopes,
             Id = service.Id,
-        }, encData, GlobalDefinitions.AccountType.User);
+        }, tokenCryptoData, GlobalDefinitions.AccountType.User);
 
         return new TokenSet
         {

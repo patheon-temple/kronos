@@ -40,7 +40,4 @@
       <ProjectReference Include="..\Hermes.SDK\Hermes.SDK.csproj" />
       <ProjectReference Include="..\Hermes.SDK\Hermes.SDK.csproj" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Athena\WebApi\Interop\Responses\" />
-    </ItemGroup>
 </Project>
