@@ -1,4 +1,5 @@
 ﻿using Kronos.WebAPI.Athena.Infrastructure;
+using Kronos.WebAPI.Hermes.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kronos.WebAPI;
@@ -7,13 +8,19 @@ public class AutoEfMigrationsHostedService(IServiceProvider serviceProvider) : B
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        
-// Apply migrations automatically
+        // Apply migrations automatically
         using var scope = serviceProvider.CreateScope();
         var services = scope.ServiceProvider;
+        await DoAutoMigrate<HermesDbContext>(services, stoppingToken);
+        await DoAutoMigrate<AthenaDbContext>(services, stoppingToken);
+    }
+
+    private static async Task DoAutoMigrate<TDbContext>(IServiceProvider services, CancellationToken stoppingToken)
+        where TDbContext : DbContext
+    {
         try
         {
-            var context = services.GetRequiredService<IDbContextFactory<AthenaDbContext>>();
+            var context = services.GetRequiredService<IDbContextFactory<TDbContext>>();
             var dbContext = await context.CreateDbContextAsync(stoppingToken);
             await dbContext.Database.MigrateAsync(stoppingToken);
         }

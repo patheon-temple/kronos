@@ -1,4 +1,4 @@
-namespace Kronos.WebAPI.Athena.WebApi.Interop.Responses;
+namespace Kronos.WebAPI.Athena.WebApi.Interop.Shared;
 
 public class PantheonIdentity(global::Athena.SDK.Models.PantheonIdentity pantheonIdentity)
 {

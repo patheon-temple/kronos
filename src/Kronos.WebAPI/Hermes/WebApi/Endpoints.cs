@@ -1,9 +1,15 @@
 using System.Net.Mime;
 using System.Security;
+using System.Text;
+using Athena.SDK;
+using Hermes.SDK;
+using Kronos.WebAPI.Athena.WebApi.Interop.Responses;
+using Kronos.WebAPI.Hermes.Mappers;
 using Kronos.WebAPI.Hermes.SDK;
-using Kronos.WebAPI.Hermes.Services;
+using Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
+using Kronos.WebAPI.Hermes.WebApi.Interop.Responses;
+using Kronos.WebAPI.Hermes.WebApi.Interop.Shared;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 
 namespace Kronos.WebAPI.Hermes.WebApi;
@@ -22,6 +28,33 @@ public static class Endpoints
                     Description = "Authenticate user",
                     OperationId = "authenticate"
                 });
+
+        v1.MapGet("/introspection",
+            ([FromServices] PantheonRequestContext requestContext) =>
+                Task.FromResult(Results.Ok((object?)requestContext))).RequireAuthorization();
+
+        var adminV1 = builder.MapGroup("/hermes/api/admin/v{v:apiVersion}").HasApiVersion(1.0);
+
+        adminV1.MapGet("/audience/{id:guid}", async ([FromRoute(Name = "id")] Guid id,
+                [FromServices] IHermesAdminApi hermesAdminApi,
+                [FromServices] IAthenaAdminApi athenaAdminApi,
+                CancellationToken cancellationToken = default) =>
+            {
+                if (!await athenaAdminApi.ServiceAccountExistsAsync(id, cancellationToken))
+                {
+                    return Results.Problem($"Audience with id {id} doesn't exist",
+                        statusCode: StatusCodes.Status424FailedDependency, title: "Audience doesn't exist");
+                }
+
+                var data = await hermesAdminApi.GetOrCreateTokenCryptoDataAsync(id, cancellationToken);
+                return Results.Ok(new GetAudienceCryptoResponse
+                {
+                    Expiration = data.Expiration,
+                    EncryptionKey = Convert.ToBase64String(data.EncryptionKey),
+                    SigningKey = Convert.ToBase64String(data.SigningKey)
+                });
+            }
+        ).RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
     }
 
     private static async Task<IResult> PostAuthenticate(
@@ -51,34 +84,14 @@ public static class Endpoints
         return request.CredentialsType switch
         {
             CredentialsType.DeviceId => await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!,
-                request.RequestedScopes!.ToArray(), cancellationToken),
+                request.RequestedScopes!.ToArray(), request.Audience, cancellationToken),
             CredentialsType.Password => await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
-                request.Password!, request.RequestedScopes!.ToArray(), cancellationToken),
+                request.Password!, request.RequestedScopes!.ToArray(), request.Audience, cancellationToken),
             CredentialsType.Unknown => throw new ArgumentOutOfRangeException(),
+            CredentialsType.AuthorizationCode => await hermesApi.CreateTokenSetForServiceAsync(request.ServiceId!.Value,
+                Encoding.UTF8.GetBytes(request.AuthorizationCode!), request.RequestedScopes, request.Audience,
+                cancellationToken),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
-}
-
-public record AuthenticationSuccessfulResponse(string AccessToken, string UserId, string[] Scopes, string? Username);
-
-public class AuthenticationPostRequest
-{
-    public AuthenticationPostRequest(string? username)
-    {
-        Username = username;
-    }
-
-    public CredentialsType CredentialsType { get; set; } = CredentialsType.DeviceId;
-    public string[] RequestedScopes { get; set; } = [];
-    public string? Password { get; set; }
-    public string? DeviceId { get; set; }
-    public string? Username { get; set; }
-}
-
-public enum CredentialsType
-{
-    Unknown = 0,
-    DeviceId = 1,
-    Password
 }
