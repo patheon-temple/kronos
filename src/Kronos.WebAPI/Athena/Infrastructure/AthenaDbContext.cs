@@ -51,8 +51,6 @@ public sealed class AthenaDbContext(DbContextOptions<AthenaDbContext> options) :
 
     private static void CreateUserScopes(ModelBuilder modelBuilder)
     {
-       
-
         modelBuilder.Entity<UserAccountDataModel>()
             .HasMany(x => x.Scopes)
             .WithMany(x => x.Accounts)
@@ -73,7 +71,7 @@ public sealed class AthenaDbContext(DbContextOptions<AthenaDbContext> options) :
             .IsRequired();
         
         modelBuilder.Entity<ServiceAccountDataModel>()
-            .Property(b => b.Secret)
+            .Property(b => b.AuthorizationCode)
             .HasMaxLength(256);
     }
 

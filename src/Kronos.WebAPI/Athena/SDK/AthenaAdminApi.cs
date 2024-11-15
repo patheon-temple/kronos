@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 using Athena.SDK;
 using Athena.SDK.Models;
 using FluentValidation;
@@ -30,7 +31,7 @@ internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextF
         }
 
         scopes = scopes.Where(x => !x.Equals(GlobalDefinitions.Scopes.Superuser)).ToArray();
-        
+
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var scopeEntities = await db.UserScopes
             .Where(x => scopes.Contains(x.Id))
@@ -87,13 +88,17 @@ internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextF
             : await db.ServiceScopes.Where(x => requiredScopes.Contains(x.Id))
                 .ToArrayAsync(cancellationToken: cancellationToken);
 
+        var salt = new byte[512];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(salt);
+
         var data = await db.ServiceAccounts.AddAsync(
             new ServiceAccountDataModel
             {
                 Id = Guid.NewGuid(),
                 Name = serviceName,
-                Secret = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N")),
-                Scopes = scopes
+                AuthorizationCode = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N")),
+                Scopes = scopes,
             },
             cancellationToken: cancellationToken);
 
@@ -112,5 +117,12 @@ internal sealed class AthenaAdminApi(IDbContextFactory<AthenaDbContext> contextF
             cancellationToken: cancellationToken);
 
         return data == null ? null : ServiceMappers.ToDomain(data);
+    }
+
+    public async Task<bool> ServiceAccountExistsAsync(Guid serviceId, CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        return await db.ServiceAccounts.AnyAsync(x => x.Id == serviceId, cancellationToken: cancellationToken);
     }
 }

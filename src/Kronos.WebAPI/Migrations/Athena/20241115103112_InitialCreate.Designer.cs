@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Kronos.WebAPI.Migrations
+namespace Kronos.WebAPI.Migrations.Athena
 {
     [DbContext(typeof(AthenaDbContext))]
-    [Migration("20241113100339_ServiceAccounts")]
-    partial class ServiceAccounts
+    [Migration("20241115103112_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,15 +32,15 @@ namespace Kronos.WebAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<byte[]>("AuthorizationCode")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("bytea");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
-
-                    b.Property<byte[]>("Secret")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("bytea");
 
                     b.HasKey("Id");
 

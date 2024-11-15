@@ -17,7 +17,8 @@ public static class ServiceInstaller
         services.AddScoped<IAthenaApi, AthenaApi>();
         services.AddScoped<IAthenaAdminApi, AthenaAdminApi>();
         services.AddPooledDbContextFactory<AthenaDbContext>(opt =>
-            opt.UseNpgsql(configuration.GetConnectionString("Postge_Athena")));
+            opt.UseNpgsql(configuration.GetConnectionString(GlobalDefinitions.ConfigurationKeys.PostgresConnectionString),
+                x=>x.MigrationsHistoryTable("__EFMigrationsHistory", "athena")));
         services.AddTransient<IValidator<UserCredentialsValidationParams>>(x => Passwords.CreateValidator());
     }
 }

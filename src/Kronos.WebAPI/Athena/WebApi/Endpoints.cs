@@ -14,9 +14,11 @@ public static class Endpoints
         var v1Admin = builder.MapGroup("/athena/api/admin/v{v:apiVersion}").HasApiVersion(1.0);
         v1Admin.MapPost("account/user", CreateUserAccount).RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
         v1Admin.MapPost("account/service",CreateServiceAccountAsync).RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
+        
         v1Admin.MapGet("account/user/{id:guid}", GetUserAccountByIdAsync)
             .WithName(nameof(GetUserAccountByIdAsync)) // (mobert): added due to Results.Create routing
             .RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
+        
         v1Admin.MapGet("account/service/{id:guid}", GetServiceAccountByIdAsync)
             .WithName(nameof(GetServiceAccountByIdAsync)) // (mobert): added due to Results.Create routing
             .RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
@@ -54,7 +56,7 @@ public static class Endpoints
             {
                 ServiceName = identity.Name,
                 Id = identity.Id,
-                AuthorizationCode = Encoding.UTF8.GetString(identity.Secret)
+                AuthorizationCode = Encoding.UTF8.GetString(identity.AuthorizationCode),
             });
     }
 
@@ -67,7 +69,7 @@ public static class Endpoints
         return Results.Ok(new ServiceAccount
         {
             ServiceName = identity.Name,
-            Id = identity.Id
+            Id = identity.Id,
         });
     }
 }

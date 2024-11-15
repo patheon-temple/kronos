@@ -10,4 +10,5 @@ public sealed class RegistrationSetup : Dictionary<CredentialsType, string>
 public sealed class HermesConfiguration
 {
     public required RegistrationSetup Registration { get; set; }
+    public required JwtConfig Jwt { get; set; }
 }

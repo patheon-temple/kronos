@@ -13,15 +13,15 @@ public static class IdentityMappers
         Username = data.Username,
         Scopes = data.Scopes.Select(x => x.Id).ToArray(),
     };
-    
 }
+
 public static class ServiceMappers
 {
     public static PantheonService ToDomain(ServiceAccountDataModel data) => new()
     {
         Id = data.Id,
-        Secret = data.Secret,
-        Name = data.Name
+        Name = data.Name,
+        AuthorizationCode = data.AuthorizationCode,
+        Scopes = data.Scopes.Select(x => x.Id).ToArray(),
     };
-    
 }

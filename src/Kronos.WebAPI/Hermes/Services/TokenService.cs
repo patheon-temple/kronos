@@ -2,51 +2,45 @@
 using System.Security.Claims;
 using System.Text;
 using Athena.SDK.Models;
-using Kronos.WebAPI.Hermes.WebApi;
-using Microsoft.Extensions.Options;
+using Hermes.SDK;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Kronos.WebAPI.Hermes.Services;
 
-public class TokenService(IOptions<JwtConfig> options)
+public abstract class TokenService
 {
-    public string CreateUserAccessToken(string? username, Guid id, string[] scopes)
-    {
-        return CreateAccessToken(username, id, scopes, "user");
-    }
-    
-    public string CreateServiceAccessToken(string? username, Guid id, string[] scopes)
-    {
-        return CreateAccessToken(username, id, scopes, "service");
-    }
-    private string CreateAccessToken(string? username, Guid id, string[] scopes, string accountType)
+    public static string CreateAccessToken(TokenUserData args, TokenCryptoData cryptoData,
+        GlobalDefinitions.AccountType accountType)
     {
         var handler = new JwtSecurityTokenHandler();
 
 
         var credentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.Key)),
-            SecurityAlgorithms.HmacSha256);
+            new SymmetricSecurityKey(cryptoData.SigningKey),
+            SecurityAlgorithms.HmacSha512);
 
         IEnumerable<Claim?> enumerable =
         [
-            string.IsNullOrWhiteSpace(username)
+            string.IsNullOrWhiteSpace(args.Username)
                 ? null
-                : new Claim(JwtRegisteredClaimNames.Nickname, username),
-            new(ClaimTypes.Name, id.ToString("N")),
-            new(GlobalDefinitions.ClaimTypes.AccountType, accountType),
+                : new Claim(JwtRegisteredClaimNames.Nickname, args.Username),
+            new(ClaimTypes.Name, args.Id.ToString("N")),
+            new(GlobalDefinitions.ClaimTypes.AccountType, accountType.ToString()),
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             SigningCredentials = credentials,
-            Expires = DateTime.UtcNow.AddHours(1),
+            Expires = DateTime.UtcNow.AddSeconds(cryptoData.Expiration),
             Subject = new ClaimsIdentity(
                 enumerable.Where(x => x is not null).Cast<Claim>()
-                    .Union(scopes.Select(x => new Claim(ClaimTypes.Role, x)))
+                    .Union(args.Scopes.Select(x => new Claim(ClaimTypes.Role, x)))
             ),
-            Audience = options.Value.Audience,
-            Issuer = options.Value.Issuer
+            Audience = cryptoData.EntityId.ToString("N"),
+            Issuer = GlobalDefinitions.Jwt.Issuer,
+            IssuedAt = DateTime.UtcNow,
+            EncryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(cryptoData.EncryptionKey),
+                SecurityAlgorithms.Aes256KW,SecurityAlgorithms.Aes256CbcHmacSha512),
         };
 
         var token = handler.CreateToken(tokenDescriptor);

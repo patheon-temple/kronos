@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Kronos.WebAPI.Migrations
+namespace Kronos.WebAPI.Migrations.Athena
 {
     /// <inheritdoc />
-    public partial class ServiceAccounts : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,7 +21,7 @@ namespace Kronos.WebAPI.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Secret = table.Column<byte[]>(type: "bytea", maxLength: 256, nullable: false)
+                    AuthorizationCode = table.Column<byte[]>(type: "bytea", maxLength: 256, nullable: false)
                 },
                 constraints: table =>
                 {
