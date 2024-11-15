@@ -12,6 +12,7 @@ WORKDIR /src
 # Copy everything else and build the application
 COPY ./Kronos.WebAPI ./Kronos.WebAPI
 COPY ./Athena.SDK ./Athena.SDK
+COPY ./Hermes.SDK ./Hermes.SDK
 WORKDIR "/src/Kronos.WebAPI"
 RUN dotnet build --configuration Release -o /app/build
 
