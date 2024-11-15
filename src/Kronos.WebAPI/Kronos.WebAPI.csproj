@@ -41,11 +41,6 @@
       <ProjectReference Include="..\Hermes.SDK\Hermes.SDK.csproj" />
     </ItemGroup>
     <ItemGroup>
-<<<<<<< HEAD
-      <Folder Include="Athena\WebApi\Interop\Responses\" />
-=======
-      <Folder Include="Athena\WebApi\Interop\Requests\" />
->>>>>>> kronos-vue
       <Folder Include="Athena\WebApi\Interop\Responses\" />
     </ItemGroup>
 </Project>
