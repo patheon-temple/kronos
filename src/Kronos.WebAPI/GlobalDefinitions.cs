@@ -40,4 +40,10 @@ public static class GlobalDefinitions
         public const string PostgresConnectionString = "Postgres";
         public const string HermesConfiguration = "HermesConfiguration:Jwt";
     }
+
+    public static class Headers
+    {
+        public const string ValidateOnly = "X-Pantheon-Validate-Only";
+    }
+    
 }

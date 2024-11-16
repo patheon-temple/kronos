@@ -60,11 +60,24 @@ public static class Endpoints
     private static async Task<IResult> PostAuthenticate(
         [FromBody] AuthenticationPostRequest request,
         [FromServices] IHermesApi hermesApi,
+        [FromServices] IAthenaApi athenaApi,
+        [FromServices] IHttpContextAccessor httpContext,
         [FromServices] ILogger<AuthenticationPostRequest> logger,
         CancellationToken cancellationToken = default)
     {
         try
         {
+            if (httpContext.HttpContext != null &&
+                httpContext.HttpContext.Request.Headers.TryGetValue(GlobalDefinitions.Headers.ValidateOnly,
+                    out var value))
+            {
+                if (value.ToString().Equals("true", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var isValid = await ValidateCredentials(request, athenaApi, cancellationToken);
+                    return isValid ? Results.NoContent() : Results.Unauthorized();
+                }
+            }
+
             var tokenSet = await GetTokenSet(request, hermesApi, cancellationToken);
 
             return Results.Ok(new AuthenticationSuccessfulResponse(tokenSet.AccessToken, tokenSet.UserId,
@@ -75,6 +88,24 @@ public static class Endpoints
         {
             logger.LogError(e, "Login failed");
             return Results.Unauthorized();
+        }
+    }
+
+    private static async Task<bool> ValidateCredentials(AuthenticationPostRequest request, IAthenaApi athenaApi,
+        CancellationToken cancellationToken)
+    {
+        switch (request.CredentialsType)
+        {
+            case CredentialsType.Password:
+                return await athenaApi.ValidateUserCredentialsByUsernameAsync(request.Username!, request.Password!,
+                    cancellationToken);
+            case CredentialsType.AuthorizationCode:
+                return await athenaApi.ValidateServiceCodeAsync(request.ServiceId!.Value, request.AuthorizationCode!,
+                    cancellationToken);
+            case CredentialsType.DeviceId:
+            case CredentialsType.Unknown:
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 
@@ -89,7 +120,7 @@ public static class Endpoints
                 request.Password!, request.RequestedScopes!.ToArray(), request.Audience, cancellationToken),
             CredentialsType.Unknown => throw new ArgumentOutOfRangeException(),
             CredentialsType.AuthorizationCode => await hermesApi.CreateTokenSetForServiceAsync(request.ServiceId!.Value,
-                Encoding.UTF8.GetBytes(request.AuthorizationCode!), request.RequestedScopes, request.Audience,
+                request.AuthorizationCode!, request.RequestedScopes, request.Audience,
                 cancellationToken),
             _ => throw new ArgumentOutOfRangeException()
         };

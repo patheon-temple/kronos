@@ -1,4 +1,3 @@
-using System.Text;
 using Athena.SDK;
 using Athena.SDK.Models;
 using FluentValidation;
@@ -14,6 +13,7 @@ namespace Kronos.WebAPI.Athena.SDK;
 
 internal sealed class AthenaApi(
     IDbContextFactory<AthenaDbContext> contextFactory,
+    IPasswordService passwordService,
     IOptionsSnapshot<AthenaConfiguration> optionsSnapshot) : IAthenaApi
 {
     public async Task<PantheonIdentity> CreateUserFromDeviceIdAsync(string deviceId,
@@ -65,7 +65,7 @@ internal sealed class AthenaApi(
         {
             DeviceId = null,
             Username = username,
-            PasswordHash = Passwords.HashPassword(password)
+            PasswordHash = passwordService.HashPassword(password)
         };
         db.UserAccounts.Add(entity);
 
@@ -95,12 +95,8 @@ internal sealed class AthenaApi(
         username = username.ToLower();
 
         if (username.Equals(optionsSnapshot.Value.SuperuserUsername))
-            return new PantheonIdentity
-            {
-                DeviceId = null,
-                Id = optionsSnapshot.Value.SuperuserId,
-                Scopes = [WebAPI.GlobalDefinitions.Scopes.Superuser]
-            };
+            return SuperUserIdentity;
+
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var data = await db.UserAccounts.Include(x => x.Scopes)
             .FirstOrDefaultAsync(x => x.Username != null && x.Username.Equals(username),
@@ -109,31 +105,54 @@ internal sealed class AthenaApi(
         return data is null ? null : IdentityMappers.ToDomain(data);
     }
 
-    public async Task<bool> VerifyPasswordAsync(Guid userId, string password,
+    public async Task<bool> ValidateUserCredentialsAsync(Guid userId, string password,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
 
-        if (userId.Equals(optionsSnapshot.Value.SuperuserId))
-            return optionsSnapshot.Value.SuperuserPassword.Equals(password);
+        var user = await GetUserByIdAsync(userId, cancellationToken);
 
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-
-        var passwordHash = await db.UserAccounts.Where(x => x.Id == userId).Select(x => x.PasswordHash)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
-        if (passwordHash is null) return false;
-
-        return passwordHash.Length > 0 && Passwords.VerifyHashedPassword(passwordHash, password);
+        return user != null && passwordService.VerifyUserAccountPassword(user, password);
     }
+
+    public async Task<bool> ValidateUserCredentialsByUsernameAsync(string username, string password,
+        CancellationToken cancellationToken = default)
+    {
+        var data = await GetUserByUsernameAsync(username, cancellationToken);
+        return data is not null && passwordService.VerifyUserAccountPassword(data, password);
+    }
+
+    private PantheonIdentity SuperUserIdentity => new()
+    {
+        DeviceId = null,
+        Id = optionsSnapshot.Value.SuperuserId,
+        Scopes = [GlobalDefinitions.Scopes.Superuser],
+        PasswordHash = optionsSnapshot.Value.SuperuserPasswordEncoded,
+        Username = optionsSnapshot.Value.SuperuserUsername
+    };
 
     public async Task<PantheonIdentity?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
+        if (userId.Equals(optionsSnapshot.Value.SuperuserId))
+        {
+            return SuperUserIdentity;
+        }
+
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var data = await db.UserAccounts.Include(x => x.Scopes)
             .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken: cancellationToken);
 
         return data is null ? null : IdentityMappers.ToDomain(data);
     }
-    
+
+    public async Task<bool> ValidateServiceCodeAsync(Guid serviceId, string authorizationCode,
+        CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var data = await db.ServiceAccounts.Where(x => x.Id == serviceId)
+            .Select(x => x.AuthorizationCode)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+        return data is not null && passwordService.VerifyAuthorizationCode(data, authorizationCode);
+    }
 }

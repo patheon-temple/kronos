@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using FluentValidation;
 using Kronos.WebAPI.Athena.Definitions;
@@ -13,6 +14,8 @@ public sealed class UserCredentialsValidationParams
 
 public static partial class Passwords
 {
+    public static byte[] EncodePassword(string value) => Encoding.UTF8.GetBytes(value);
+    public static string DecodePassword(byte[] value) => Encoding.UTF8.GetString(value);
     private const int SaltSize = 16;
     private const int KeySize = 32;
     private const int IterationsCount = 1000;
@@ -86,4 +89,9 @@ public static partial class Passwords
 
     [GeneratedRegex(@"^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?])(?=.*[a-z])[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?]{7,128}$", RegexOptions.Compiled)]
     private static partial Regex ComplexityRegex();
+
+    public static bool VerifyAuthorizationCode(byte[] storedData, byte[] authCode)
+    {
+        return storedData.SequenceEqual(authCode);
+    }
 }

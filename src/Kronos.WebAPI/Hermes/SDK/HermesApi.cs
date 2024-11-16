@@ -66,7 +66,7 @@ internal class HermesApi(
                 Data = { { "username", username } }
             };
 
-        if (!await athenaApi.VerifyPasswordAsync(identity.Id, password, cancellationToken))
+        if (!await athenaApi.ValidateUserCredentialsAsync(identity.Id, password, cancellationToken))
         {
             throw new SecurityException();
         }
@@ -92,17 +92,19 @@ internal class HermesApi(
         };
     }
 
-    public async Task<TokenSet> CreateTokenSetForServiceAsync(Guid serviceId, byte[] secret, string[] requestedScopes,
+    public async Task<TokenSet> CreateTokenSetForServiceAsync(Guid serviceId, string authorizationCode,
+        string[] requestedScopes,
         Guid audience,
         CancellationToken cancellationToken = default)
     {
-        var service = await athenaAdminApi.GetServiceAccountByIdAsync(serviceId, cancellationToken);
-        if (service is null)
+        var isValid = await athenaApi.ValidateServiceCodeAsync(serviceId, authorizationCode, cancellationToken);
+        if (!isValid)
         {
-            throw new Exception("Service not found");
+            throw new Exception("Invalid authorization code");
         }
 
-        if (!service.AuthorizationCode.SequenceEqual(secret)) throw new SecurityException("Secret mismatch");
+        var service = await athenaAdminApi.GetServiceAccountByIdAsync(serviceId, cancellationToken);
+        if (service is null) throw new Exception($"Service not found {serviceId}");
 
         var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
 
