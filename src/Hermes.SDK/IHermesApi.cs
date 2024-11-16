@@ -13,7 +13,7 @@ namespace Hermes.SDK
             Guid audience,
             CancellationToken cancellationToken);
 
-        Task<TokenSet> CreateTokenSetForServiceAsync(Guid serviceId, byte[] secret, string[] requestedScopes,
+        Task<TokenSet> CreateTokenSetForServiceAsync(Guid serviceId, string authorizationCode, string[] requestedScopes,
             Guid audience, CancellationToken cancellationToken = default);
     }
 }
