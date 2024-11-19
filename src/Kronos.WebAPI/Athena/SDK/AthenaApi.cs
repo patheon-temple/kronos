@@ -43,7 +43,7 @@ internal sealed class AthenaApi(
         CancellationToken cancellationToken = default)
     {
         var data = await athenaRepository.GetUserAccountByUsernameAsync(username, cancellationToken);
-        return data is not null && passwordService.VerifyUserAccountPassword(data.PasswordHash!, password);
+        return data is not null && passwordService.VerifyUserAccountPassword(data.Id, data.PasswordHash!, password);
     }
 
     public async Task<PantheonIdentity> CreateUserFromUsernameAsync(string username, string password,
@@ -82,7 +82,6 @@ internal sealed class AthenaApi(
     public async Task<PantheonIdentity?> GetUserByUsernameAsync(string username,
         CancellationToken cancellationToken = default)
     {
-      
         var data = await athenaRepository.GetUserAccountByUsernameAsync(username, cancellationToken);
 
         return data is null ? null : IdentityMappers.ToDomain(data);
@@ -100,7 +99,6 @@ internal sealed class AthenaApi(
 
     public async Task<PantheonIdentity?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
-       
         var data = await athenaRepository.GetUserAccountByIdAsync(userId, cancellationToken);
         return data is null ? null : IdentityMappers.ToDomain(data);
     }
@@ -108,7 +106,7 @@ internal sealed class AthenaApi(
     public async Task<bool> ValidateServiceCodeAsync(Guid serviceId, string authorizationCode,
         CancellationToken cancellationToken = default)
     {
-        var data = await athenaRepository.GetServiceAccountAsync(serviceId, cancellationToken); 
+        var data = await athenaRepository.GetServiceAccountAsync(serviceId, cancellationToken);
         return data is not null && passwordService.VerifyAuthorizationCode(data.AuthorizationCode, authorizationCode);
     }
 
@@ -132,16 +130,17 @@ internal sealed class AthenaApi(
         return GetValidatedIdentityAsync(identity, password);
     }
 
-    private static PantheonIdentity? GetValidatedIdentityAsync(UserAccountDataModel? identity, string password)
+    private PantheonIdentity? GetValidatedIdentityAsync(UserAccountDataModel? identity, string password)
     {
         if (identity is null) return null;
-        return Passwords.VerifyHashedPassword(identity.PasswordHash!, password) ? IdentityMappers.ToDomain(identity) : null;
+        return passwordService.VerifyUserAccountPassword(identity.Id, identity.PasswordHash!, password)
+            ? IdentityMappers.ToDomain(identity)
+            : null;
     }
 
     public async Task<PantheonIdentity?> GetValidatedUserByUsernameAsync(string username, string password,
         CancellationToken cancellationToken = default)
     {
-       
         var identity = await athenaRepository.GetUserAccountByUsernameAsync(username, cancellationToken);
         return GetValidatedIdentityAsync(identity, password);
     }
@@ -159,14 +158,5 @@ internal sealed class AthenaApi(
     {
         var data = await athenaRepository.GetServiceAccountAsync(serviceId, cancellationToken);
         return data == null ? null : ServiceMappers.ToDomain(data);
-    }
-
-
-    public async Task<bool> ValidateDeviceCredentialsAsync(string deviceId, string password,
-        CancellationToken cancellationToken = default)
-    {
-        var data = await athenaRepository.GetUserAccountByDeviceIdAsync(deviceId, cancellationToken);
-
-        return data is not null && passwordService.VerifyUserAccountPassword(data.PasswordHash!, password);
     }
 }
