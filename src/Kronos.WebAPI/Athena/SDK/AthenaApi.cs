@@ -3,33 +3,25 @@ using Athena.SDK.Models;
 using FluentValidation;
 using Kronos.WebAPI.Athena.Crypto;
 using Kronos.WebAPI.Athena.Data;
-using Kronos.WebAPI.Athena.Domain;
-using Kronos.WebAPI.Athena.Infrastructure;
 using Kronos.WebAPI.Athena.Mappers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace Kronos.WebAPI.Athena.SDK;
 
 internal sealed class AthenaApi(
-    IDbContextFactory<AthenaDbContext> contextFactory,
     IPasswordService passwordService,
-    IOptionsSnapshot<AthenaConfiguration> optionsSnapshot) : IAthenaApi
+    IAthenaRepository athenaRepository) : IAthenaApi
 {
     public async Task<PantheonIdentity> CreateUserFromDeviceIdAsync(string deviceId,
         CancellationToken cancellationToken = default)
     {
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var identity = await db.UserAccounts.FirstOrDefaultAsync(
-            entity => entity.DeviceId != null && entity.DeviceId.Equals(deviceId), cancellationToken);
+        var identity = await athenaRepository.GetUserAccountByDeviceIdAsync(deviceId, cancellationToken);
 
         if (identity is not null) return IdentityMappers.ToDomain(identity);
 
-        await db.AddAsync(identity = new UserAccountDataModel
+        await athenaRepository.CreateUserAccountAsync(identity = new UserAccountDataModel
         {
             DeviceId = deviceId
         }, cancellationToken);
-        await db.SaveChangesAsync(cancellationToken);
 
         return IdentityMappers.ToDomain(identity);
     }
@@ -37,20 +29,21 @@ internal sealed class AthenaApi(
     public async Task<PantheonIdentity?> GetUserByDeviceIdAsync(string deviceId,
         CancellationToken cancellationToken = default)
     {
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var entity = await db.UserAccounts
-            .Include(x => x.Scopes)
-            .FirstOrDefaultAsync(x => x.DeviceId != null && x.DeviceId.Equals(deviceId),
-                cancellationToken: cancellationToken);
+        var entity = await athenaRepository.GetUserAccountByDeviceIdAsync(deviceId, cancellationToken);
         return entity is null ? null : IdentityMappers.ToDomain(entity);
     }
 
-    public async Task<bool> DoesUsernameExistAsync(string username, CancellationToken cancellationToken = default)
+    public Task<bool> DoesUsernameExistAsync(string username, CancellationToken cancellationToken = default)
     {
         username = username.ToLower();
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        return await db.UserAccounts.AnyAsync(x => x.Username != null && x.Username.Equals(username),
-            cancellationToken);
+        return athenaRepository.DoesUsernameExistsAsync(username, cancellationToken);
+    }
+
+    public async Task<bool> ValidateUserCredentialsByUsernameAsync(string username, string password,
+        CancellationToken cancellationToken = default)
+    {
+        var data = await athenaRepository.GetUserAccountByUsernameAsync(username, cancellationToken);
+        return data is not null && passwordService.VerifyUserAccountPassword(data.PasswordHash!, password);
     }
 
     public async Task<PantheonIdentity> CreateUserFromUsernameAsync(string username, string password,
@@ -59,17 +52,14 @@ internal sealed class AthenaApi(
         username = username.ToLower();
 
         await IsUsernameAndPasswordValidOrThrowAsync(username, password, cancellationToken);
-
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var entity = new UserAccountDataModel
+        UserAccountDataModel entity;
+        await athenaRepository.CreateUserAccountAsync(entity = new UserAccountDataModel
         {
             DeviceId = null,
             Username = username,
             PasswordHash = passwordService.HashPassword(password)
-        };
-        db.UserAccounts.Add(entity);
+        }, cancellationToken);
 
-        await db.SaveChangesAsync(cancellationToken);
         return IdentityMappers.ToDomain(entity);
     }
 
@@ -92,15 +82,8 @@ internal sealed class AthenaApi(
     public async Task<PantheonIdentity?> GetUserByUsernameAsync(string username,
         CancellationToken cancellationToken = default)
     {
-        username = username.ToLower();
-
-        if (username.Equals(optionsSnapshot.Value.SuperuserUsername))
-            return SuperUserIdentity;
-
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = await db.UserAccounts.Include(x => x.Scopes)
-            .FirstOrDefaultAsync(x => x.Username != null && x.Username.Equals(username),
-                cancellationToken: cancellationToken);
+      
+        var data = await athenaRepository.GetUserAccountByUsernameAsync(username, cancellationToken);
 
         return data is null ? null : IdentityMappers.ToDomain(data);
     }
@@ -115,72 +98,75 @@ internal sealed class AthenaApi(
         return user != null && passwordService.VerifyUserAccountPassword(user, password);
     }
 
-    public async Task<bool> ValidateUserCredentialsByUsernameAsync(string username, string password,
-        CancellationToken cancellationToken = default)
-    {
-        var data = await GetUserByUsernameAsync(username, cancellationToken);
-        return data is not null && passwordService.VerifyUserAccountPassword(data, password);
-    }
-
-    private PantheonIdentity SuperUserIdentity => new()
-    {
-        DeviceId = null,
-        Id = optionsSnapshot.Value.SuperuserId,
-        Scopes = [GlobalDefinitions.Scopes.Superuser],
-        PasswordHash = optionsSnapshot.Value.SuperuserPasswordEncoded,
-        Username = optionsSnapshot.Value.SuperuserUsername
-    };
-
     public async Task<PantheonIdentity?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
-        if (userId.Equals(optionsSnapshot.Value.SuperuserId))
-        {
-            return SuperUserIdentity;
-        }
-
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = await db.UserAccounts.Include(x => x.Scopes)
-            .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken: cancellationToken);
-
+       
+        var data = await athenaRepository.GetUserAccountByIdAsync(userId, cancellationToken);
         return data is null ? null : IdentityMappers.ToDomain(data);
     }
 
     public async Task<bool> ValidateServiceCodeAsync(Guid serviceId, string authorizationCode,
         CancellationToken cancellationToken = default)
     {
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = await db.ServiceAccounts.Where(x => x.Id == serviceId)
-            .Select(x => x.AuthorizationCode)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
-        return data is not null && passwordService.VerifyAuthorizationCode(data, authorizationCode);
+        var data = await athenaRepository.GetServiceAccountAsync(serviceId, cancellationToken); 
+        return data is not null && passwordService.VerifyAuthorizationCode(data.AuthorizationCode, authorizationCode);
     }
 
     public async Task<string> ResetUserPasswordAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = await db.UserAccounts.Where(x => x.Id == userId)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        var data = await athenaRepository.GetUserAccountByIdAsync(userId, cancellationToken);
 
         if (data is null)
             throw new NullReferenceException("Not found");
 
         data.PasswordHash = passwordService.HashPassword(Guid.NewGuid().ToString("D"));
-        db.Update(data);
-        await db.SaveChangesAsync(cancellationToken);
 
+        await athenaRepository.UpdateUserAsync(data, cancellationToken);
         return passwordService.DecodePassword(data.PasswordHash);
     }
+
+    public async Task<PantheonIdentity?> GetValidatedUserByDeviceIdAsync(string deviceId, string password,
+        CancellationToken cancellationToken = default)
+    {
+        var identity = await athenaRepository.GetUserAccountByDeviceIdAsync(deviceId, cancellationToken);
+        return GetValidatedIdentityAsync(identity, password);
+    }
+
+    private static PantheonIdentity? GetValidatedIdentityAsync(UserAccountDataModel? identity, string password)
+    {
+        if (identity is null) return null;
+        return Passwords.VerifyHashedPassword(identity.PasswordHash!, password) ? IdentityMappers.ToDomain(identity) : null;
+    }
+
+    public async Task<PantheonIdentity?> GetValidatedUserByUsernameAsync(string username, string password,
+        CancellationToken cancellationToken = default)
+    {
+       
+        var identity = await athenaRepository.GetUserAccountByUsernameAsync(username, cancellationToken);
+        return GetValidatedIdentityAsync(identity, password);
+    }
+
+    public async Task<PantheonService?> GetValidatedServiceAsync(Guid serviceId, string authorizationCode,
+        CancellationToken cancellationToken = default)
+    {
+        var data = await GetServiceAccountByIdAsync(serviceId, cancellationToken);
+        return data is not null && passwordService.VerifyAuthorizationCode(data.AuthorizationCode, authorizationCode)
+            ? data
+            : null;
+    }
+
+    private async Task<PantheonService?> GetServiceAccountByIdAsync(Guid serviceId, CancellationToken cancellationToken)
+    {
+        var data = await athenaRepository.GetServiceAccountAsync(serviceId, cancellationToken);
+        return data == null ? null : ServiceMappers.ToDomain(data);
+    }
+
 
     public async Task<bool> ValidateDeviceCredentialsAsync(string deviceId, string password,
         CancellationToken cancellationToken = default)
     {
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = await db.UserAccounts
-            .Where(x => x.DeviceId == deviceId)
-            .Select(x => x.PasswordHash)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        var data = await athenaRepository.GetUserAccountByDeviceIdAsync(deviceId, cancellationToken);
 
-        return data is not null && passwordService.VerifyUserAccountPassword(data, password);
+        return data is not null && passwordService.VerifyUserAccountPassword(data.PasswordHash!, password);
     }
 }

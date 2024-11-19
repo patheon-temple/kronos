@@ -1,31 +1,20 @@
-using System.Security;
-using System.Security.Cryptography;
 using Athena.SDK;
 using Hermes.SDK;
 using Kronos.WebAPI.Hermes.Exceptions;
 using Kronos.WebAPI.Hermes.Services;
-using Microsoft.Extensions.Options;
 
 namespace Kronos.WebAPI.Hermes.SDK;
 
 internal class HermesApi(
     IAthenaApi athenaApi,
-    IAthenaAdminApi athenaAdminApi,
-    IHermesAdminApi hermesAdminApi,
-    IOptions<HermesConfiguration> options
+    IHermesAdminApi hermesAdminApi
 ) : IHermesApi
 {
     public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, string password, string[] requestedScopes, Guid audience,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceId);
-        var isValid = await athenaApi.ValidateDeviceCredentialsAsync(deviceId, password, cancellationToken);
-        if (!isValid)
-        {
-            throw new SecurityException("Forbidden");
-        }
-
-        var identity = await athenaApi.GetUserByDeviceIdAsync(deviceId, cancellationToken);
+        var identity = await athenaApi.GetValidatedUserByDeviceIdAsync(deviceId, password, cancellationToken);
         if (identity is null) throw new NullReferenceException();
         
         var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
@@ -56,19 +45,13 @@ internal class HermesApi(
         ArgumentException.ThrowIfNullOrWhiteSpace(username);
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
 
-        var identity = await athenaApi.GetUserByUsernameAsync(username, cancellationToken);
+        var identity = await athenaApi.GetValidatedUserByUsernameAsync(username, password, cancellationToken);
 
         if (identity is null)
             throw new UserNotFoundExistException
             {
                 Data = { { "username", username } }
             };
-
-        if (!await athenaApi.ValidateUserCredentialsAsync(identity.Id, password, cancellationToken))
-        {
-            throw new SecurityException();
-        }
-
         var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
         if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
 
@@ -95,13 +78,7 @@ internal class HermesApi(
         Guid audience,
         CancellationToken cancellationToken = default)
     {
-        var isValid = await athenaApi.ValidateServiceCodeAsync(serviceId, authorizationCode, cancellationToken);
-        if (!isValid)
-        {
-            throw new Exception("Invalid authorization code");
-        }
-
-        var service = await athenaAdminApi.GetServiceAccountByIdAsync(serviceId, cancellationToken);
+        var service = await athenaApi.GetValidatedServiceAsync(serviceId, authorizationCode, cancellationToken);
         if (service is null) throw new Exception($"Service not found {serviceId}");
 
         var tokenCryptoData = serviceId == audience
