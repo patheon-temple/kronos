@@ -4,8 +4,6 @@ using Athena.SDK;
 using Hermes.SDK;
 using Kronos.WebAPI.Hermes.Exceptions;
 using Kronos.WebAPI.Hermes.Services;
-using Kronos.WebAPI.Hermes.WebApi.Interop.Shared;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Kronos.WebAPI.Hermes.SDK;
@@ -17,19 +15,19 @@ internal class HermesApi(
     IOptions<HermesConfiguration> options
 ) : IHermesApi
 {
-    public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, string[] requestedScopes, Guid audience,
+    public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, string password, string[] requestedScopes, Guid audience,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceId);
-        var identity = await athenaApi.GetUserByDeviceIdAsync(deviceId, cancellationToken);
-        if (identity is null)
+        var isValid = await athenaApi.ValidateDeviceCredentialsAsync(deviceId, password, cancellationToken);
+        if (!isValid)
         {
-            if (!options.Value.Registration.IsEnabled(CredentialsType.DeviceId))
-                throw new SecurityException("Forbidden");
-
-            identity = await athenaApi.CreateUserFromDeviceIdAsync(deviceId, CancellationToken.None);
+            throw new SecurityException("Forbidden");
         }
 
+        var identity = await athenaApi.GetUserByDeviceIdAsync(deviceId, cancellationToken);
+        if (identity is null) throw new NullReferenceException();
+        
         var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
         if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
 

@@ -16,9 +16,15 @@ public class PasswordService(IOptions<AthenaConfiguration> options) : IPasswordS
     public bool VerifyUserAccountPassword(PantheonIdentity pantheonIdentity, string password)
     {
         if (options.Value.IsSuperUser(pantheonIdentity.Id)) return password.Equals(options.Value.SuperuserPassword);
-        return Passwords.VerifyHashedPassword(pantheonIdentity.PasswordHash!, password);
+        return VerifyUserAccountPassword(pantheonIdentity.PasswordHash!, password);
     }
 
+    public bool VerifyUserAccountPassword(byte[] hash, string password)
+    {
+        return Passwords.VerifyHashedPassword(hash, password);
+    }
+
+    
     public bool VerifyAuthorizationCode(byte[] data, string authorizationCode)
     {
         return Passwords.VerifyAuthorizationCode(data, Encoding.UTF8.GetBytes(authorizationCode));

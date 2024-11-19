@@ -171,4 +171,16 @@ internal sealed class AthenaApi(
 
         return passwordService.DecodePassword(data.PasswordHash);
     }
+
+    public async Task<bool> ValidateDeviceCredentialsAsync(string deviceId, string password,
+        CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var data = await db.UserAccounts
+            .Where(x => x.DeviceId == deviceId)
+            .Select(x => x.PasswordHash)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+        return data is not null && passwordService.VerifyUserAccountPassword(data, password);
+    }
 }
