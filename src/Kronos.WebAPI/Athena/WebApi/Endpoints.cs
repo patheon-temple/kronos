@@ -1,7 +1,9 @@
 using System.Text;
 using Athena.SDK;
 using Kronos.WebAPI.Athena.WebApi.Interop.Requests;
+using Kronos.WebAPI.Athena.WebApi.Interop.Responses;
 using Kronos.WebAPI.Athena.WebApi.Interop.Shared;
+using Kronos.WebAPI.Hermes.SDK;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kronos.WebAPI.Athena.WebApi;
@@ -11,6 +13,11 @@ public static class Endpoints
     public static void Register(WebApplication app)
     {
         var builder = app.NewVersionedApi("Athena");
+        var v1 = builder.MapGroup("/athena/api/v{v:apiVersion}").HasApiVersion(1.0);
+        
+        v1.MapPatch("account/user/password", ResetUserPassword)
+            .RequireAuthorization();
+
         var v1Admin = builder.MapGroup("/athena/api/admin/v{v:apiVersion}").HasApiVersion(1.0);
         v1Admin.MapPost("account/user", CreateUserAccount).RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
         v1Admin.MapPost("account/service",CreateServiceAccountAsync).RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
@@ -22,6 +29,19 @@ public static class Endpoints
         v1Admin.MapGet("account/service/{id:guid}", GetServiceAccountByIdAsync)
             .WithName(nameof(GetServiceAccountByIdAsync)) // (mobert): added due to Results.Create routing
             .RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
+    }
+
+    private static async Task<IResult> ResetUserPassword(
+        [FromServices] IAthenaApi athenaApi,
+        [FromServices] PantheonRequestContext context)
+    {
+        if (context.UserId == null) return Results.BadRequest();
+            var newPwd =await athenaApi.ResetUserPasswordAsync(context.UserId.Value);
+
+            return Results.Ok(new ResetUserPasswordResponse
+            {
+                Password = newPwd
+            });
     }
 
     private static async Task<IResult> GetUserAccountByIdAsync(
