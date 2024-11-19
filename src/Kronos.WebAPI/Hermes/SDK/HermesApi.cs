@@ -48,10 +48,7 @@ internal class HermesApi(
         var identity = await athenaApi.GetValidatedUserByUsernameAsync(username, password, cancellationToken);
 
         if (identity is null)
-            throw new UserNotFoundExistException
-            {
-                Data = { { "username", username } }
-            };
+            throw new Exception($"Username {username} doesn't exists");
         var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
         if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
 
