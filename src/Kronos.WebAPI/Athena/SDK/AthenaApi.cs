@@ -14,6 +14,7 @@ namespace Kronos.WebAPI.Athena.SDK;
 internal sealed class AthenaApi(
     IDbContextFactory<AthenaDbContext> contextFactory,
     IPasswordService passwordService,
+    ILogger<AthenaApi> logger,
     IOptionsSnapshot<AthenaConfiguration> optionsSnapshot) : IAthenaApi
 {
     public async Task<PantheonIdentity> CreateUserFromDeviceIdAsync(string deviceId,
@@ -93,7 +94,7 @@ internal sealed class AthenaApi(
         CancellationToken cancellationToken = default)
     {
         username = username.ToLower();
-
+        logger.LogWarning("Superuser username: {Username}", optionsSnapshot.Value.SuperuserUsername);
         if (username.Equals(optionsSnapshot.Value.SuperuserUsername))
             return SuperUserIdentity;
 
