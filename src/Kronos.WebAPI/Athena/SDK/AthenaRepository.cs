@@ -56,7 +56,7 @@ public class AthenaRepository(
     {
         username = username.ToLower();
         logger.LogWarning("Username: {Username} == {Other}", optionsSnapshot.Value.SuperuserUsername, username);
-        if (username.Equals(optionsSnapshot.Value.SuperuserUsername))
+        if (optionsSnapshot.Value.IsSuperUser(username))
             return SuperUser;
 
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
