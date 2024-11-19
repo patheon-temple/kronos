@@ -1,4 +1,5 @@
-﻿using Kronos.WebAPI.Athena.Crypto;
+﻿using Athena.SDK.Models;
+using Kronos.WebAPI.Athena.Crypto;
 
 namespace Kronos.WebAPI.Athena.Domain;
 
@@ -10,4 +11,8 @@ public sealed class AthenaConfiguration
     public byte[] SuperuserPasswordEncoded => Passwords.EncodePassword(SuperuserPassword);
 
     public bool IsSuperUser(Guid id) => id.Equals(SuperuserId);
+
+    public bool IsSuperUser(string username) => SuperuserUsername.Equals(username);
+   
+    
 }

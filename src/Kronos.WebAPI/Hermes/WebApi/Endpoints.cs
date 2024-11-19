@@ -115,13 +115,13 @@ public static class Endpoints
         return request.CredentialsType switch
         {
             CredentialsType.DeviceId => await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!,
-                request.RequestedScopes!.ToArray(), request.Audience, cancellationToken),
+                request.Password!, request.RequestedScopes!.ToArray(), request.Audience, cancellationToken),
             CredentialsType.Password => await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
                 request.Password!, request.RequestedScopes!.ToArray(), request.Audience, cancellationToken),
-            CredentialsType.Unknown => throw new ArgumentOutOfRangeException(),
             CredentialsType.AuthorizationCode => await hermesApi.CreateTokenSetForServiceAsync(request.ServiceId!.Value,
                 request.AuthorizationCode!, request.RequestedScopes, request.Audience,
                 cancellationToken),
+            CredentialsType.Unknown => throw new ArgumentOutOfRangeException(),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
