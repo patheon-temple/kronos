@@ -55,7 +55,7 @@ public class AthenaRepository(
         CancellationToken cancellationToken)
     {
         username = username.ToLower();
-        logger.LogWarning("Username: {Username}", optionsSnapshot.Value.SuperuserUsername);
+        logger.LogWarning("Username: {Username} == {Other}", optionsSnapshot.Value.SuperuserUsername, username);
         if (username.Equals(optionsSnapshot.Value.SuperuserUsername))
             return SuperUser;
 
