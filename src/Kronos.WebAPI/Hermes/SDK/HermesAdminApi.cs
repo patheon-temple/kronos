@@ -64,7 +64,8 @@ internal class HermesAdminApi(
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         var data = await db.TokenCryptoData.FirstOrDefaultAsync(x => x.EntityId == audience,
             cancellationToken: cancellationToken);
-        if (data is null) return null;
+        if (data is null)
+            return null;
         return new TokenCryptoData
         {
             EncryptionKey = data.EncryptionKey,
