@@ -7,4 +7,5 @@ public interface IPasswordService
     byte[] HashPassword(string password);
     bool VerifyUserAccountPassword(PantheonIdentity pantheonIdentity, string password);
     bool VerifyAuthorizationCode(byte[] data, string authorizationCode);
+    string DecodePassword(byte[] passwordHash);
 }

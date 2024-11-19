@@ -155,4 +155,20 @@ internal sealed class AthenaApi(
 
         return data is not null && passwordService.VerifyAuthorizationCode(data, authorizationCode);
     }
+
+    public async Task<string> ResetUserPasswordAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var data = await db.UserAccounts.Where(x => x.Id == userId)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+        if (data is null)
+            throw new NullReferenceException("Not found");
+
+        data.PasswordHash = passwordService.HashPassword(Guid.NewGuid().ToString("D"));
+        db.Update(data);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return passwordService.DecodePassword(data.PasswordHash);
+    }
 }

@@ -23,4 +23,9 @@ public class PasswordService(IOptions<AthenaConfiguration> options) : IPasswordS
     {
         return Passwords.VerifyAuthorizationCode(data, Encoding.UTF8.GetBytes(authorizationCode));
     }
+
+    public string DecodePassword(byte[] passwordHash)
+    {
+        return Passwords.DecodePassword(passwordHash);
+    }
 }
