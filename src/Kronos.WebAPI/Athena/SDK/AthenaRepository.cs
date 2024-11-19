@@ -9,7 +9,8 @@ namespace Kronos.WebAPI.Athena.SDK;
 
 public class AthenaRepository(
     IDbContextFactory<AthenaDbContext> contextFactory,
-    IOptionsSnapshot<AthenaConfiguration> optionsSnapshot
+    IOptionsSnapshot<AthenaConfiguration> optionsSnapshot,
+    ILogger<AthenaRepository> logger
 ) : IAthenaRepository
 {
     public async Task<UserAccountDataModel?> GetUserAccountByDeviceIdAsync(string deviceId,
@@ -49,11 +50,12 @@ public class AthenaRepository(
             }
         }
     };
+
     public async Task<UserAccountDataModel?> GetUserAccountByUsernameAsync(string username,
         CancellationToken cancellationToken)
     {
         username = username.ToLower();
-
+        logger.LogWarning("Username: {Username}", optionsSnapshot.Value.SuperuserUsername);
         if (username.Equals(optionsSnapshot.Value.SuperuserUsername))
             return SuperUser;
 
@@ -92,7 +94,4 @@ public class AthenaRepository(
             .Where(x => x.Id == serviceId)
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
-    
-    
-
 }
