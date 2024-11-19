@@ -106,9 +106,14 @@ internal class HermesApi(
         var service = await athenaAdminApi.GetServiceAccountByIdAsync(serviceId, cancellationToken);
         if (service is null) throw new Exception($"Service not found {serviceId}");
 
-        var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
+        var tokenCryptoData = serviceId == audience
+            ? await hermesAdminApi.GetOrCreateTokenCryptoDataAsync(serviceId, cancellationToken)
+            : await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
 
-        if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
+        if (tokenCryptoData is null)
+        {
+            throw new Exception($"Audience {audience} is invalid");
+        }
 
         var validScopes = FilterScopes(requestedScopes, service.Scopes);
         var accessToken = TokenService.CreateAccessToken(new TokenUserData
