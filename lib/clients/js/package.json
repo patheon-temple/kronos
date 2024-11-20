@@ -1,21 +1,23 @@
 {
   "name": "@patheon-temple/kronos",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Set of clients that can integrate the API",
   "type": "module",
-  "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "module": "dist/index.js",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+    "./*": {
+      "import": "./dist/*.js",
+      "types": "./dist/*.d.ts"
     }
   },
   "files": [
     "dist/**/*"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc -b",
+    "codegen": "swagger-typescript-api -p http://localhost:5108/swagger/v1/swagger.json -o ./src/generated -r --add-readonly --enum-names-as-values --axios --clean-output --modular",
+    "deploy": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
