@@ -1,0 +1,38 @@
+{
+  "name": "@patheon-temple/kronos",
+  "version": "1.0.0",
+  "description": "Set of clients that can integrate the API",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patheon-temple/kronos.git"
+  },
+  "keywords": [
+    "kronos"
+  ],
+  "author": "Martin Obert",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/patheon-temple/kronos/issues"
+  },
+  "homepage": "https://github.com/patheon-temple/kronos#readme",
+  "devDependencies": {
+    "@types/node": "^22.9.1",
+    "axios": "^1.7.7",
+    "typescript": "^5.6.3"
+  }
+}

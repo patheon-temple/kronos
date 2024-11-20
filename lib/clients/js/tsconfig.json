@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES6",                // JavaScript version to compile to
+    "module": "ESNext",             // Use ES Modules
+    "declaration": true,            // Generate .d.ts files for type definitions
+    "outDir": "./dist",             // Directory for compiled output
+    "strict": true,                 // Enable strict type checking
+    "esModuleInterop": true,        // Allow default imports from CommonJS modules
+    "skipLibCheck": true,           // Skip type checking of declaration files
+    "moduleResolution": "node",    // Resolve modules using Node.js conventions
+    "forceConsistentCasingInFileNames": true, // Ensure consistent casing in imports
+    "allowSyntheticDefaultImports": true,    // Support default imports for modules without default exports
+    "sourceMap": true               // Generate source maps for debugging
+  },
+  "include": ["src/**/*"],          // Compile all files in the src/ directory
+  "exclude": ["node_modules", "dist"] // Exclude unnecessary folders
+}
