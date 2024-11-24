@@ -3,6 +3,7 @@ using System.Security;
 using System.Text;
 using Athena.SDK;
 using Hermes.SDK;
+using Hermes.SDK.UseCases;
 using Kronos.WebAPI.Athena.WebApi.Interop.Responses;
 using Kronos.WebAPI.Hermes.Mappers;
 using Kronos.WebAPI.Hermes.SDK;
@@ -78,6 +79,17 @@ public static class Endpoints
                 }
             }
 
+           var result =  await (new CreateTokenSetUseCase()).ExecuteAsync(cancellationToken);
+           switch (result.Status)
+           {
+               case CreateTokenSetUseCase.Result.Failure: return Results.BadRequest();
+               case CreateTokenSetUseCase.Result.Unknown:
+                   break;
+               case CreateTokenSetUseCase.Result.Success:
+                   break;
+               default:
+                   throw new ArgumentOutOfRangeException();
+           }
             var tokenSet = await GetTokenSet(request, hermesApi, cancellationToken);
 
             return Results.Ok(new AuthenticationSuccessfulResponse(tokenSet.AccessToken, tokenSet.UserId,
