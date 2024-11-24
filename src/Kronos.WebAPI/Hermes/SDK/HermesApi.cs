@@ -1,6 +1,5 @@
 using Athena.SDK;
 using Hermes.SDK;
-using Kronos.WebAPI.Hermes.Exceptions;
 using Kronos.WebAPI.Hermes.Services;
 
 namespace Kronos.WebAPI.Hermes.SDK;
@@ -10,13 +9,32 @@ internal class HermesApi(
     IHermesAdminApi hermesAdminApi
 ) : IHermesApi
 {
-    public async Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, string password, string[] requestedScopes, Guid audience,
+    public async Task<Result<CreateTokenSetResult, TokenSet>> CreateTokenSetAsync(CreateTokenSetArgs args,
+        CancellationToken cancellationToken)
+    {
+        return args.CredentialsType switch
+        {
+            CredentialsType.DeviceId => await CreateTokenSetForDeviceAsync(args.DeviceId!,
+                args.Password!, args.RequestedScopes.ToArray(), args.Audience, cancellationToken),
+            CredentialsType.Password => await CreateTokenSetForUserCredentialsAsync(args.Username!,
+                args.Password!, args.RequestedScopes.ToArray(), args.Audience, cancellationToken),
+            CredentialsType.AuthorizationCode => await CreateTokenSetForServiceAsync(
+                args.ServiceId!.Value,
+                args.AuthorizationCode!, args.RequestedScopes, args.Audience,
+                cancellationToken),
+            CredentialsType.Unknown => throw new ArgumentOutOfRangeException(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    public async Task<Result<CreateTokenSetResult, TokenSet>> CreateTokenSetForDeviceAsync(string deviceId,
+        string password, string[] requestedScopes, Guid audience,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceId);
         var identity = await athenaApi.GetValidatedUserByDeviceIdAsync(deviceId, password, cancellationToken);
         if (identity is null) throw new NullReferenceException();
-        
+
         var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
         if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
 
@@ -29,16 +47,17 @@ internal class HermesApi(
             Id = identity.Id,
         }, tokenCryptoData, GlobalDefinitions.AccountType.User);
 
-        return new TokenSet
+        return new Result<CreateTokenSetResult, TokenSet>(CreateTokenSetResult.Success, new TokenSet
         {
             Scopes = validScopes,
             AccessToken = accessToken,
             UserId = identity.Id.ToString(),
             Username = identity.Username,
-        };
+        });
     }
 
-    public async Task<TokenSet> CreateTokenSetForUserCredentialsAsync(string username, string password,
+    public async Task<Result<CreateTokenSetResult, TokenSet>> CreateTokenSetForUserCredentialsAsync(string username,
+        string password,
         string[] requestedScopes, Guid audience,
         CancellationToken cancellationToken)
     {
@@ -61,16 +80,17 @@ internal class HermesApi(
             Id = identity.Id,
         }, tokenCryptoData, GlobalDefinitions.AccountType.User);
 
-        return new TokenSet
+        return new Result<CreateTokenSetResult, TokenSet>(CreateTokenSetResult.Success, new TokenSet
         {
             Scopes = validScopes,
             AccessToken = accessToken,
             UserId = identity.Id.ToString(),
             Username = identity.Username,
-        };
+        });
     }
 
-    public async Task<TokenSet> CreateTokenSetForServiceAsync(Guid serviceId, string authorizationCode,
+    public async Task<Result<CreateTokenSetResult, TokenSet>> CreateTokenSetForServiceAsync(Guid serviceId,
+        string authorizationCode,
         string[] requestedScopes,
         Guid audience,
         CancellationToken cancellationToken = default)
@@ -96,13 +116,14 @@ internal class HermesApi(
             Id = service.Id,
         }, tokenCryptoData, GlobalDefinitions.AccountType.User);
 
-        return new TokenSet
-        {
-            Scopes = validScopes,
-            AccessToken = accessToken,
-            UserId = service.Id.ToString("N"),
-            Username = service.Id.ToString("N"),
-        };
+        return new Result<CreateTokenSetResult, TokenSet>(CreateTokenSetResult.Success,
+            new TokenSet
+            {
+                Scopes = validScopes,
+                AccessToken = accessToken,
+                UserId = service.Id.ToString("N"),
+                Username = service.Id.ToString("N"),
+            });
     }
 
     private static string[] FilterScopes(string[] requestedScopes, string[] availableScopes)

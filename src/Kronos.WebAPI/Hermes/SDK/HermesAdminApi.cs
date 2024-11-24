@@ -14,8 +14,6 @@ internal class HermesAdminApi(
     IAthenaAdminApi athenaAdminApi,
     IDbContextFactory<HermesDbContext> contextFactory) : IHermesAdminApi
 {
-   
-
     public async Task<TokenCryptoData> CreateTokenCryptoDataAsync(Guid audience,
         CancellationToken cancellationToken = default)
     {
@@ -74,10 +72,21 @@ internal class HermesAdminApi(
         };
     }
 
-    public async Task<TokenCryptoData> GetOrCreateTokenCryptoDataAsync(Guid audience,
-        CancellationToken cancellationToken= default)
+    public async Task<Result<GetOrCreateTokenCryptoDataResult, TokenCryptoData?>> GetOrCreateTokenCryptoDataAsync(
+        Guid audience,
+        CancellationToken cancellationToken = default)
+
     {
-        var data = await GetTokenCryptoDataAsync(audience, cancellationToken);
-        return data ?? await CreateTokenCryptoDataAsync(audience, cancellationToken);
+        if (!await athenaAdminApi.ServiceAccountExistsAsync(audience, cancellationToken))
+        {
+            return new Result<GetOrCreateTokenCryptoDataResult, TokenCryptoData?>(
+                GetOrCreateTokenCryptoDataResult.Failure, null);
+        }
+
+
+        var data = await GetTokenCryptoDataAsync(audience, cancellationToken) ??
+                   await CreateTokenCryptoDataAsync(audience, cancellationToken);
+        return new Result<GetOrCreateTokenCryptoDataResult, TokenCryptoData?>(GetOrCreateTokenCryptoDataResult.Success,
+            data);
     }
 }

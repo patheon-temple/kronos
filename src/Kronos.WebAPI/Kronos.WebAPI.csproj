@@ -40,4 +40,7 @@
       <ProjectReference Include="..\Hermes.SDK\Hermes.SDK.csproj" />
       <ProjectReference Include="..\Hermes.SDK\Hermes.SDK.csproj" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Hermes\WebApi\Interop\Shared\" />
+    </ItemGroup>
 </Project>

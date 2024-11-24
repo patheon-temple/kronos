@@ -1,15 +1,11 @@
 using System.Net.Mime;
-using System.Security;
-using System.Text;
 using Athena.SDK;
 using Hermes.SDK;
-using Hermes.SDK.UseCases;
 using Kronos.WebAPI.Athena.WebApi.Interop.Responses;
-using Kronos.WebAPI.Hermes.Mappers;
+using Kronos.WebAPI.Hermes.Extensions;
 using Kronos.WebAPI.Hermes.SDK;
 using Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
 using Kronos.WebAPI.Hermes.WebApi.Interop.Responses;
-using Kronos.WebAPI.Hermes.WebApi.Interop.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
@@ -41,19 +37,19 @@ public static class Endpoints
                 [FromServices] IAthenaAdminApi athenaAdminApi,
                 CancellationToken cancellationToken = default) =>
             {
-                if (!await athenaAdminApi.ServiceAccountExistsAsync(id, cancellationToken))
+                var result = await hermesAdminApi.GetOrCreateTokenCryptoDataAsync(id, cancellationToken);
+                return result.Status switch
                 {
-                    return Results.Problem($"Audience with id {id} doesn't exist",
-                        statusCode: StatusCodes.Status424FailedDependency, title: "Audience doesn't exist");
-                }
-
-                var data = await hermesAdminApi.GetOrCreateTokenCryptoDataAsync(id, cancellationToken);
-                return Results.Ok(new GetAudienceCryptoResponse
-                {
-                    Expiration = data.Expiration,
-                    EncryptionKey = Convert.ToBase64String(data.EncryptionKey),
-                    SigningKey = Convert.ToBase64String(data.SigningKey)
-                });
+                    GetOrCreateTokenCryptoDataResult.Success => Results.Ok(new GetAudienceCryptoResponse
+                    {
+                        Expiration = result.Data!.Expiration,
+                        EncryptionKey = Convert.ToBase64String(result.Data.EncryptionKey),
+                        SigningKey = Convert.ToBase64String(result.Data.SigningKey)
+                    }),
+                    GetOrCreateTokenCryptoDataResult.Failure => Results.StatusCode(StatusCodes
+                        .Status500InternalServerError),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
             }
         ).RequireAuthorization(GlobalDefinitions.Policies.SuperUser);
     }
@@ -66,74 +62,27 @@ public static class Endpoints
         [FromServices] ILogger<AuthenticationPostRequest> logger,
         CancellationToken cancellationToken = default)
     {
-        try
+        var createTokenSetArgs = new CreateTokenSetArgs
         {
-            if (httpContext.HttpContext != null &&
-                httpContext.HttpContext.Request.Headers.TryGetValue(GlobalDefinitions.Headers.ValidateOnly,
-                    out var value))
-            {
-                if (value.ToString().Equals("true", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    var isValid = await ValidateCredentials(request, athenaApi, cancellationToken);
-                    return isValid ? Results.NoContent() : Results.Unauthorized();
-                }
-            }
+            CredentialsType = request.CredentialsType,
+            Username = request.Username,
+            AuthorizationCode = request.AuthorizationCode,
+            Password = request.Password,
+            DeviceId = request.DeviceId,
+            Audience = request.Audience,
+            ServiceId = request.ServiceId,
+            RequestedScopes = request.RequestedScopes
+        };
 
-           var result =  await (new CreateTokenSetUseCase()).ExecuteAsync(cancellationToken);
-           switch (result.Status)
-           {
-               case CreateTokenSetUseCase.Result.Failure: return Results.BadRequest();
-               case CreateTokenSetUseCase.Result.Unknown:
-                   break;
-               case CreateTokenSetUseCase.Result.Success:
-                   break;
-               default:
-                   throw new ArgumentOutOfRangeException();
-           }
-            var tokenSet = await GetTokenSet(request, hermesApi, cancellationToken);
 
-            return Results.Ok(new AuthenticationSuccessfulResponse(tokenSet.AccessToken, tokenSet.UserId,
-                tokenSet.Scopes,
-                tokenSet.Username));
-        }
-        catch (SecurityException e)
+        var result = await hermesApi.CreateTokenSetAsync(createTokenSetArgs, cancellationToken);
+        return result.Status switch
         {
-            logger.LogError(e, "Login failed");
-            return Results.Unauthorized();
-        }
-    }
-
-    private static async Task<bool> ValidateCredentials(AuthenticationPostRequest request, IAthenaApi athenaApi,
-        CancellationToken cancellationToken)
-    {
-        switch (request.CredentialsType)
-        {
-            case CredentialsType.Password:
-                return await athenaApi.ValidateUserCredentialsByUsernameAsync(request.Username!, request.Password!,
-                    cancellationToken);
-            case CredentialsType.AuthorizationCode:
-                return await athenaApi.ValidateServiceCodeAsync(request.ServiceId!.Value, request.AuthorizationCode!,
-                    cancellationToken);
-            case CredentialsType.DeviceId:
-            case CredentialsType.Unknown:
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-    }
-
-    private static async Task<TokenSet> GetTokenSet(AuthenticationPostRequest request, IHermesApi hermesApi,
-        CancellationToken cancellationToken)
-    {
-        return request.CredentialsType switch
-        {
-            CredentialsType.DeviceId => await hermesApi.CreateTokenSetForDeviceAsync(request.DeviceId!,
-                request.Password!, request.RequestedScopes!.ToArray(), request.Audience, cancellationToken),
-            CredentialsType.Password => await hermesApi.CreateTokenSetForUserCredentialsAsync(request.Username!,
-                request.Password!, request.RequestedScopes!.ToArray(), request.Audience, cancellationToken),
-            CredentialsType.AuthorizationCode => await hermesApi.CreateTokenSetForServiceAsync(request.ServiceId!.Value,
-                request.AuthorizationCode!, request.RequestedScopes, request.Audience,
-                cancellationToken),
-            CredentialsType.Unknown => throw new ArgumentOutOfRangeException(),
+            CreateTokenSetResult.Success when httpContext.HasRequestHeaderValue(GlobalDefinitions.Headers.ValidateOnly,
+                "true") => Results.NoContent(),
+            CreateTokenSetResult.Success => Results.Ok(new AuthenticationSuccessfulResponse(result.Data.AccessToken,
+                result.Data.UserId, result.Data.Scopes, result.Data.Username)),
+            CreateTokenSetResult.Failure => Results.StatusCode(StatusCodes.Status500InternalServerError),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
