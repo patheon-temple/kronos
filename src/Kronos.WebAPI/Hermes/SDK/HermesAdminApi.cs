@@ -1,10 +1,7 @@
-using System.Security;
 using System.Security.Cryptography;
 using Athena.SDK;
 using Hermes.SDK;
-using Kronos.WebAPI.Hermes.Mappers;
 using Kronos.WebAPI.Hermes.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Kronos.WebAPI.Hermes.SDK;
@@ -12,21 +9,20 @@ namespace Kronos.WebAPI.Hermes.SDK;
 internal class HermesAdminApi(
     IOptions<HermesConfiguration> options,
     IAthenaAdminApi athenaAdminApi,
-    IDbContextFactory<HermesDbContext> contextFactory) : IHermesAdminApi
+    HermesRepository repository) : IHermesAdminApi
 {
-   
-
-    public async Task<TokenCryptoData> CreateTokenCryptoDataAsync(Guid audience,
+    public async Task<(TokenCryptoData?, CreateTokenCryptoDataError?)> CreateTokenCryptoDataAsync(
+        Guid audience,
         CancellationToken cancellationToken = default)
     {
-        if (GlobalDefinitions.Jwt.AthenaAudience.Equals(audience))
+        if (GlobalDefinitions.Jwt.IsAthenaAudience(audience))
         {
-            return options.Value.Jwt.ToTokenCryptoData();
+            return (options.Value.Jwt.ToTokenCryptoData(), null);
         }
 
         var doesExists = await athenaAdminApi.ServiceAccountExistsAsync(audience, cancellationToken);
         if (!doesExists)
-            throw new SecurityException($"No audience with id {audience} found");
+            return (null, CreateTokenCryptoDataError.NonExistingAudience);
 
         var encryptionData = new byte[GlobalDefinitions.Limits.EncryptionKeyMaxSize];
         var signingData = new byte[GlobalDefinitions.Limits.SigningKeyMaxSize];
@@ -35,49 +31,63 @@ internal class HermesAdminApi(
         rand.GetNonZeroBytes(encryptionData);
         rand.GetNonZeroBytes(signingData);
 
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = new TokenCryptoDataModel
-        {
-            EncryptionKey = encryptionData,
-            SigningKey = signingData,
-            EntityId = audience,
-        };
-        await db.TokenCryptoData.AddAsync(data, cancellationToken);
-        await db.SaveChangesAsync(cancellationToken);
+        var data = await repository.CreatTokenCryptoDataAsync(encryptionData, signingData, audience, cancellationToken);
 
-        return new TokenCryptoData
-        {
-            EncryptionKey = data.EncryptionKey,
-            EntityId = data.EntityId,
-            SigningKey = data.SigningKey,
-        };
+        return (new TokenCryptoData
+            {
+                EncryptionKey = data.EncryptionKey,
+                EntityId = data.EntityId,
+                SigningKey = data.SigningKey,
+            }, null);
     }
 
-    public async Task<TokenCryptoData?> GetTokenCryptoDataAsync(Guid audience,
+    public async Task<(TokenCryptoData?, GetTokenCryptoDataError?)> GetTokenCryptoDataAsync(Guid audience,
         CancellationToken cancellationToken = default)
     {
         if (GlobalDefinitions.Jwt.AthenaAudience.Equals(audience))
         {
-            return options.Value.Jwt.ToTokenCryptoData();
+            return (options.Value.Jwt.ToTokenCryptoData(), null);
         }
 
-        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var data = await db.TokenCryptoData.FirstOrDefaultAsync(x => x.EntityId == audience,
-            cancellationToken: cancellationToken);
+        var data = await repository.GetTokenDataAsync(audience, cancellationToken);
+
         if (data is null)
-            return null;
-        return new TokenCryptoData
-        {
-            EncryptionKey = data.EncryptionKey,
-            EntityId = data.EntityId,
-            SigningKey = data.SigningKey,
-        };
+            return (null, GetTokenCryptoDataError.NotFound);
+
+        return (new TokenCryptoData
+            {
+                EncryptionKey = data.EncryptionKey,
+                EntityId = data.EntityId,
+                SigningKey = data.SigningKey,
+            }, null);
     }
 
-    public async Task<TokenCryptoData> GetOrCreateTokenCryptoDataAsync(Guid audience,
-        CancellationToken cancellationToken= default)
+    public async Task<(TokenCryptoData?, GetOrCreateTokenCryptoDataError?)> GetOrCreateTokenCryptoDataAsync(
+        Guid audience,
+        CancellationToken cancellationToken = default)
+
     {
-        var data = await GetTokenCryptoDataAsync(audience, cancellationToken);
-        return data ?? await CreateTokenCryptoDataAsync(audience, cancellationToken);
+        if (!await athenaAdminApi.ServiceAccountExistsAsync(audience, cancellationToken))
+        {
+            return (null, GetOrCreateTokenCryptoDataError.ServiceAccountNotFound);
+        }
+
+        var (data, getTokenError) = await GetTokenCryptoDataAsync(audience, cancellationToken);
+
+        if (getTokenError is null) return (data, null);
+
+        return getTokenError switch
+        {
+            GetTokenCryptoDataError.NotFound => await CreateInternalAsync(),
+            _ => throw new UnhandledBranchError(getTokenError)
+        };
+
+        async Task<(TokenCryptoData?, GetOrCreateTokenCryptoDataError?)> CreateInternalAsync()
+        {
+            var (tokenCryptoData, error) = await CreateTokenCryptoDataAsync(audience, cancellationToken);
+            if(error is null) return (tokenCryptoData, null);
+            
+            return (tokenCryptoData, GetOrCreateTokenCryptoDataError.UnableToCreateToken);
+        }
     }
 }

@@ -21,6 +21,11 @@ public static class GlobalDefinitions
     {
         public static Guid AthenaAudience { get; } = Guid.Parse("1c95fa3e-bcae-4ecb-a585-7fca315cc377");
         public const string Issuer = "hermes";
+
+        public static bool IsAthenaAudience(Guid audience)
+        {
+            return AthenaAudience.Equals(audience);
+        }
     }
 
     public enum AccountType

@@ -6,11 +6,9 @@ namespace Hermes.SDK
 {
     public interface IHermesAdminApi
     {
-        Task<TokenCryptoData> CreateTokenCryptoDataAsync(Guid audience, CancellationToken cancellationToken = default);
+        Task<(TokenCryptoData?, GetTokenCryptoDataError?)> GetTokenCryptoDataAsync(Guid audience, CancellationToken cancellationToken = default);
 
-        Task<TokenCryptoData?> GetTokenCryptoDataAsync(Guid audience, CancellationToken cancellationToken = default);
-
-        Task<TokenCryptoData> GetOrCreateTokenCryptoDataAsync(Guid audience,
+        Task<(TokenCryptoData?,GetOrCreateTokenCryptoDataError?)> GetOrCreateTokenCryptoDataAsync(Guid audience,
             CancellationToken cancellationToken = default);
     }
 }

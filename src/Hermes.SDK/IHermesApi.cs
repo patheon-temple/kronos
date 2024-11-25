@@ -1,19 +1,19 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Hermes.SDK
 {
+    public enum CreateTokenSetError
+    {
+        NonExistingAudience,
+        NonExistingUsername,
+        ServiceCredentialsInvalid,
+        FailedToCreateToken
+    }
+
     public interface IHermesApi
     {
-        Task<TokenSet> CreateTokenSetForDeviceAsync(string deviceId, string password, string[] requestedScopes, Guid audience,
+        Task<(TokenSet?, CreateTokenSetError?)> CreateTokenSetAsync(CreateTokenSetArgs args,
             CancellationToken cancellationToken);
-
-        Task<TokenSet> CreateTokenSetForUserCredentialsAsync(string username, string password, string[] requestedScopes,
-            Guid audience,
-            CancellationToken cancellationToken);
-
-        Task<TokenSet> CreateTokenSetForServiceAsync(Guid serviceId, string authorizationCode, string[] requestedScopes,
-            Guid audience, CancellationToken cancellationToken = default);
     }
 }

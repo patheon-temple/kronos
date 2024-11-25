@@ -1,4 +1,4 @@
-using Kronos.WebAPI.Hermes.WebApi.Interop.Shared;
+using Hermes.SDK;
 
 namespace Kronos.WebAPI.Hermes.WebApi.Interop.Requests;
 
