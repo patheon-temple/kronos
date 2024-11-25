@@ -6,9 +6,9 @@ namespace Hermes.SDK
     public enum CreateTokenSetError
     {
         NonExistingAudience,
-        NonExistingUsername,
         ServiceCredentialsInvalid,
-        FailedToCreateToken
+        FailedToCreateToken,
+        InvalidCredentials
     }
 
     public interface IHermesApi

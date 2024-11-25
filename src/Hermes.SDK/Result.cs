@@ -3,24 +3,24 @@ using System.Runtime.Serialization;
 
 namespace Hermes.SDK
 {
-    public sealed class UnhandledBranchError : Exception
+    public sealed class OperationErrorException : Exception
     {
-        public UnhandledBranchError(Enum type)
+        public OperationErrorException(Enum type)
         {
             Type = type;
         }
 
-        public UnhandledBranchError(SerializationInfo info, StreamingContext context, Enum type) : base(info, context)
+        public OperationErrorException(SerializationInfo info, StreamingContext context, Enum type) : base(info, context)
         {
             Type = type;
         }
 
-        public UnhandledBranchError(string message, Enum type) : base(message)
+        public OperationErrorException(string message, Enum type) : base(message)
         {
             Type = type;
         }
 
-        public UnhandledBranchError(string message, Exception innerException, Enum type) : base(message, innerException)
+        public OperationErrorException(string message, Exception innerException, Enum type) : base(message, innerException)
         {
             Type = type;
         }
