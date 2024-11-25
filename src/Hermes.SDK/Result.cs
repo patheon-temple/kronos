@@ -1,24 +1,59 @@
 using System;
+using System.Runtime.Serialization;
 
 namespace Hermes.SDK
 {
-    public class Result<T> where T : Enum
+    public sealed class UnhandledBranchError : Exception
     {
-        public Result(T status)
+        public UnhandledBranchError(Enum type)
         {
-            Status = status;
+            Type = type;
         }
 
-        public T Status { get; }
+        public UnhandledBranchError(SerializationInfo info, StreamingContext context, Enum type) : base(info, context)
+        {
+            Type = type;
+        }
+
+        public UnhandledBranchError(string message, Enum type) : base(message)
+        {
+            Type = type;
+        }
+
+        public UnhandledBranchError(string message, Exception innerException, Enum type) : base(message, innerException)
+        {
+            Type = type;
+        }
+
+        public Enum Type { get; }
+        
     }
-
-    public class Result<T, TU> : Result<T> where T : Enum
+    
+    public class OperationError
     {
-        public Result(T status, TU data) : base(status)
+        public string Message { get; }
+        public OperationError(string message)
         {
-            Data = data;
+            Message = message;
+        }
+        public OperationError(Exception exception)
+        {
+            Message = exception.ToString();
+        }
+    }
+    
+    public  class OperationError<T> : OperationError where T : struct, Enum
+    {
+        public OperationError(string message, T? type) : base(message)
+        {
+            Type = type;
         }
 
-        public TU Data { get; }
+        public OperationError(Exception exception, T? type) : base(exception)
+        {
+            Type = type;
+        }
+
+        public T? Type { get; }
     }
 }

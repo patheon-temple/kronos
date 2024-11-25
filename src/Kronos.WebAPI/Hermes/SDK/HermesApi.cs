@@ -1,4 +1,5 @@
 using Athena.SDK;
+using Athena.SDK.Models;
 using Hermes.SDK;
 using Kronos.WebAPI.Hermes.Services;
 
@@ -9,7 +10,7 @@ internal class HermesApi(
     IHermesAdminApi hermesAdminApi
 ) : IHermesApi
 {
-    public async Task<Result<CreateTokenSetResult, TokenSet>> CreateTokenSetAsync(CreateTokenSetArgs args,
+    public async Task<(TokenSet?, CreateTokenSetError?)> CreateTokenSetAsync(CreateTokenSetArgs args,
         CancellationToken cancellationToken)
     {
         return args.CredentialsType switch
@@ -27,7 +28,7 @@ internal class HermesApi(
         };
     }
 
-    public async Task<Result<CreateTokenSetResult, TokenSet>> CreateTokenSetForDeviceAsync(string deviceId,
+    private async Task<(TokenSet?, CreateTokenSetError?)> CreateTokenSetForDeviceAsync(string deviceId,
         string password, string[] requestedScopes, Guid audience,
         CancellationToken cancellationToken)
     {
@@ -35,28 +36,22 @@ internal class HermesApi(
         var identity = await athenaApi.GetValidatedUserByDeviceIdAsync(deviceId, password, cancellationToken);
         if (identity is null) throw new NullReferenceException();
 
-        var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
-        if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
+        var (tokenCryptoData, error) = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
+        if (error is not null)
+            return (null, CreateTokenSetError.NonExistingAudience);
 
-        var validScopes = FilterScopes(requestedScopes, identity.Scopes);
-        var accessToken = TokenService.CreateAccessToken(new TokenUserData
-        {
-            Audience = audience.ToString("N"),
-            Username = identity.Username,
-            Scopes = validScopes,
-            Id = identity.Id,
-        }, tokenCryptoData, GlobalDefinitions.AccountType.User);
+        var (accessToken, validScopes) = CreateTokenForAudience(requestedScopes, audience, identity, tokenCryptoData);
 
-        return new Result<CreateTokenSetResult, TokenSet>(CreateTokenSetResult.Success, new TokenSet
+        return (new TokenSet
         {
             Scopes = validScopes,
             AccessToken = accessToken,
             UserId = identity.Id.ToString(),
             Username = identity.Username,
-        });
+        }, null);
     }
 
-    public async Task<Result<CreateTokenSetResult, TokenSet>> CreateTokenSetForUserCredentialsAsync(string username,
+    private async Task<(TokenSet?, CreateTokenSetError?)> CreateTokenSetForUserCredentialsAsync(string username,
         string password,
         string[] requestedScopes, Guid audience,
         CancellationToken cancellationToken)
@@ -67,45 +62,67 @@ internal class HermesApi(
         var identity = await athenaApi.GetValidatedUserByUsernameAsync(username, password, cancellationToken);
 
         if (identity is null)
-            throw new Exception($"Username {username} doesn't exists");
-        var tokenCryptoData = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
-        if (tokenCryptoData is null) throw new Exception($"Audience {audience} is invalid");
+            return (null, CreateTokenSetError.NonExistingUsername);
 
-        var validScopes = FilterScopes(requestedScopes, identity.Scopes);
-        var accessToken = TokenService.CreateAccessToken(new TokenUserData
-        {
-            Audience = audience.ToString("N"),
-            Username = identity.Username,
-            Scopes = validScopes,
-            Id = identity.Id,
-        }, tokenCryptoData, GlobalDefinitions.AccountType.User);
+        var (tokenCryptoData, error) = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
 
-        return new Result<CreateTokenSetResult, TokenSet>(CreateTokenSetResult.Success, new TokenSet
+        if (error is not null) return (null, CreateTokenSetError.NonExistingAudience);
+
+        var (accessToken, validScopes) =
+            CreateTokenForAudience(requestedScopes, audience, identity, tokenCryptoData);
+
+        return (new TokenSet
         {
             Scopes = validScopes,
             AccessToken = accessToken,
             UserId = identity.Id.ToString(),
             Username = identity.Username,
-        });
+        }, null);
     }
 
-    public async Task<Result<CreateTokenSetResult, TokenSet>> CreateTokenSetForServiceAsync(Guid serviceId,
+    private static (string AccessToken, string[] ValidScopes) CreateTokenForAudience(string[] requestedScopes,
+        Guid audience, PantheonIdentity identity,
+        TokenCryptoData? tokenCryptoData)
+    {
+        var validScopes = FilterScopes(requestedScopes, identity.Scopes);
+        return (TokenService.CreateAccessToken(new TokenUserData
+        {
+            Audience = audience.ToString("N"),
+            Username = identity.Username,
+            Scopes = validScopes,
+            Id = identity.Id,
+        }, tokenCryptoData!, GlobalDefinitions.AccountType.User), validScopes);
+    }
+
+    private async Task<(TokenSet?, CreateTokenSetError?)> CreateTokenSetForServiceAsync(Guid serviceId,
         string authorizationCode,
         string[] requestedScopes,
         Guid audience,
         CancellationToken cancellationToken = default)
     {
         var service = await athenaApi.GetValidatedServiceAsync(serviceId, authorizationCode, cancellationToken);
-        if (service is null) throw new Exception($"Service not found {serviceId}");
+        if (service is null) return (null, CreateTokenSetError.ServiceCredentialsInvalid);
 
-        var tokenCryptoData = serviceId == audience
-            ? await hermesAdminApi.GetOrCreateTokenCryptoDataAsync(serviceId, cancellationToken)
-            : await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
+        TokenCryptoData data;
 
-        if (tokenCryptoData is null)
+        if (serviceId == audience)
         {
-            throw new Exception($"Audience {audience} is invalid");
+            var (tokenCryptoData, error) =
+                await hermesAdminApi.GetOrCreateTokenCryptoDataAsync(serviceId, cancellationToken);
+            if (error is not null)
+                return (null, CreateTokenSetError.FailedToCreateToken);
+
+            data = tokenCryptoData!;
         }
+        else
+        {
+            var (tokenCryptoData, error) = await hermesAdminApi.GetTokenCryptoDataAsync(audience, cancellationToken);
+            if (error is not null)
+                return (null, CreateTokenSetError.FailedToCreateToken);
+            
+            data = tokenCryptoData!;
+        }
+
 
         var validScopes = FilterScopes(requestedScopes, service.Scopes);
         var accessToken = TokenService.CreateAccessToken(new TokenUserData
@@ -114,16 +131,16 @@ internal class HermesApi(
             Username = service.Id.ToString("N"),
             Scopes = validScopes,
             Id = service.Id,
-        }, tokenCryptoData, GlobalDefinitions.AccountType.User);
+        }, data, GlobalDefinitions.AccountType.Service);
 
-        return new Result<CreateTokenSetResult, TokenSet>(CreateTokenSetResult.Success,
+        return (
             new TokenSet
             {
                 Scopes = validScopes,
                 AccessToken = accessToken,
                 UserId = service.Id.ToString("N"),
                 Username = service.Id.ToString("N"),
-            });
+            }, null);
     }
 
     private static string[] FilterScopes(string[] requestedScopes, string[] availableScopes)

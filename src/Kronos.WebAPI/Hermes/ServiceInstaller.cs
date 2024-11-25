@@ -13,6 +13,7 @@ public static class ServiceInstaller
     {
         services.AddScoped<IHermesApi, HermesApi>();
         services.AddScoped<IHermesAdminApi, HermesAdminApi>();
+        services.AddScoped<HermesRepository>();
         services.AddOptions<HermesConfiguration>().BindConfiguration("HermesConfiguration").ValidateOnStart().ValidateDataAnnotations();
         services.AddOptions<JwtConfig>().BindConfiguration(GlobalDefinitions.ConfigurationKeys.HermesConfiguration).ValidateDataAnnotations().ValidateOnStart();
         services.AddPooledDbContextFactory<HermesDbContext>(opt => opt.UseNpgsql(
