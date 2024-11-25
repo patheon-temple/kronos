@@ -31,6 +31,7 @@ public static class Handlers
         };
 
         var (result, error) = await hermesApi.CreateTokenSetAsync(createTokenSetArgs, cancellationToken);
+        
         if (error is null)
         {
             if (httpContext.HasRequestHeaderValue(GlobalDefinitions.Headers.ValidateOnly,
@@ -44,8 +45,8 @@ public static class Handlers
         {
             CreateTokenSetError.NonExistingAudience => Results.Problem(statusCode: StatusCodes.Status401Unauthorized,
                 title: "Audience doesn't exists", detail: error.ToString()),
-            CreateTokenSetError.NonExistingUsername => Results.Problem(statusCode: StatusCodes.Status401Unauthorized,
-                title: "Username doesn't exists", detail: error.ToString()),
+            CreateTokenSetError.InvalidCredentials => Results.Problem(statusCode: StatusCodes.Status401Unauthorized,
+                title: "Invalid credentials", detail: error.ToString()),
             CreateTokenSetError.ServiceCredentialsInvalid => Results.Problem(
                 statusCode: StatusCodes.Status401Unauthorized, title: "Invalid credentials", detail: error.ToString()),
             _ => Results.StatusCode(StatusCodes.Status500InternalServerError)

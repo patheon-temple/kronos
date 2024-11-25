@@ -1,5 +1,6 @@
 using System.Text;
 using Athena.SDK;
+using Hermes.SDK;
 using Kronos.WebAPI.Athena.WebApi.Interop.Requests;
 using Kronos.WebAPI.Athena.WebApi.Interop.Responses;
 using Kronos.WebAPI.Athena.WebApi.Interop.Shared;
@@ -36,11 +37,22 @@ public static class Endpoints
         [FromServices] PantheonRequestContext context)
     {
         if (context.UserId == null) return Results.BadRequest();
-            var newPwd =await athenaApi.ResetUserPasswordAsync(context.UserId.Value);
+            var (newPwd, error) =await athenaApi.ResetUserPasswordAsync(context.UserId.Value);
 
+            if (error is not null)
+            {
+                switch (error)
+                {
+                    case ResetUserPasswordError.InvalidPasswordFormat:
+                        return Results.BadRequest("Invalid password format");
+                    default:
+                        throw new OperationErrorException(error);
+                }
+            }
+            
             return Results.Ok(new ResetUserPasswordResponse
             {
-                Password = newPwd
+                Password = newPwd!
             });
     }
 
